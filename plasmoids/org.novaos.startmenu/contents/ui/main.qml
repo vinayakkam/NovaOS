@@ -23,8 +23,9 @@ PlasmoidItem {
     id: root
 
     // ---------- Twilight tokens ----------
-    readonly property color accent: "#f2683a"
-    readonly property color accent2: "#f3b651"
+    // Follows the system accent colour (Settings > Personalisation)
+    readonly property color accent: Kirigami.Theme.highlightColor
+    readonly property color accent2: Qt.lighter(accent, 1.3)
     readonly property color textColor: "#f1eee6"
     readonly property color subtext: "#aeb3c8"
     readonly property color dim: "#727892"
@@ -130,7 +131,7 @@ PlasmoidItem {
             id: mark
             anchors.centerIn: parent
             readonly property real size: Math.round(compact.thickness * 0.5)
-            readonly property real gap: root.expanded ? size * 0.16 : (compact.containsMouse ? size * 0.13 : size * 0.09)
+            property real gap: root.expanded ? size * 0.16 : (compact.containsMouse ? size * 0.13 : size * 0.09)
             readonly property real tile: (size - gap) / 2
             width: size
             height: size
@@ -207,7 +208,7 @@ PlasmoidItem {
                 Layout.preferredHeight: 44
                 radius: 22
                 color: Qt.rgba(1, 1, 1, 0.07)
-                border.color: search.activeFocus ? Qt.rgba(0.95, 0.41, 0.23, 0.55) : root.border
+                border.color: search.activeFocus ? Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.55) : root.border
 
                 Kirigami.Icon {
                     id: searchIcon

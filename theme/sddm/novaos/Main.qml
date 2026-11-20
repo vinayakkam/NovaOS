@@ -155,7 +155,12 @@ Rectangle {
                     id: face
                     anchors.fill: parent
                     anchors.margins: 4
-                    source: root.currentUser && root.currentUser.face !== "" ? "file://" + root.currentUser.face : "file:///usr/share/pixmaps/novaos-avatar.png"
+                    // SDDM already gives a file:// URL (or a plain path on older versions)
+                    source: {
+                        const f = root.currentUser ? String(root.currentUser.face || "") : "";
+                        if (f === "") return "file:///usr/share/pixmaps/novaos-avatar.png";
+                        return f.startsWith("file:") ? f : "file://" + f;
+                    }
                     fillMode: Image.PreserveAspectCrop
                     visible: false
                     onStatusChanged: if (status === Image.Error) source = "file:///usr/share/pixmaps/novaos-avatar.png"

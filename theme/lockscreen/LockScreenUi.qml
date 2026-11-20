@@ -33,8 +33,8 @@ import org.kde.breeze.components
 Item {
     id: ui
 
-    readonly property color accent: "#f2683a"
-    readonly property color accent2: "#f3b651"
+    readonly property color accent: Kirigami.Theme.highlightColor
+    readonly property color accent2: Qt.lighter(accent, 1.3)
     readonly property color textColor: "#f1eee6"
     readonly property color subtext: "#c9cde0"
 

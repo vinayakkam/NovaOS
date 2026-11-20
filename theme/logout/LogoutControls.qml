@@ -1,6 +1,6 @@
 /*
-    NovaOS logout controls: clock, user, countdown and the action tiles.
-    Visibility rules follow Plasma's LogoutControls.qml so every logout type
+    NovaOS logout controls (Windows Ctrl+Alt+Del style): user, a list of actions,
+    Cancel. Visibility rules follow Plasma's LogoutControls.qml so every logout type
     (log out, restart, shut down, "all options") behaves the same.
 
     SPDX-FileCopyrightText: 2014 Aleix Pol Gonzalez <aleixpol@blue-systems.com>
@@ -28,212 +28,217 @@ Item {
 
     opacity: 0
     onHostRootChanged: fadeIn.restart()
-    NumberAnimation {
+    ParallelAnimation {
         id: fadeIn
-        target: controls; property: "opacity"; from: 0; to: 1
-        duration: 220; easing.type: Easing.OutCubic
+        NumberAnimation { target: controls; property: "opacity"; from: 0; to: 1; duration: 220; easing.type: Easing.OutCubic }
+        NumberAnimation { target: column; property: "anchors.verticalCenterOffset"; from: 24; to: 0; duration: 280; easing.type: Easing.OutCubic }
     }
 
     KCoreAddons.KUser { id: kuser }
-
     SessionsModel {
         id: otherSessionsModel
         includeUnusedSessions: false
         includeOwnSession: false
     }
 
-    // ---------- Clock ----------
-    Column {
-        id: clockColumn
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        anchors.topMargin: parent.height * 0.1
-        spacing: 2
-
-        Text {
-            id: timeText
-            anchors.horizontalCenter: parent.horizontalCenter
-            color: "#f1eee6"
-            font.family: "Inter"
-            font.pixelSize: 84
-            font.weight: Font.Light
-            text: Qt.formatTime(new Date(), Qt.locale().timeFormat(Locale.ShortFormat).replace(/:ss/, ""))
-        }
-        Text {
-            id: dateText
-            anchors.horizontalCenter: parent.horizontalCenter
-            color: "#aeb3c8"
-            font.family: "Inter"
-            font.pixelSize: 20
-            text: Qt.formatDate(new Date(), "dddd, d MMMM")
-        }
-        Timer {
-            interval: 1000; running: true; repeat: true
-            onTriggered: {
-                timeText.text = Qt.formatTime(new Date(), Qt.locale().timeFormat(Locale.ShortFormat).replace(/:ss/, ""));
-                dateText.text = Qt.formatDate(new Date(), "dddd, d MMMM");
-            }
-        }
-    }
-
-    // ---------- User + actions ----------
     ColumnLayout {
         id: column
         anchors.centerIn: parent
-        anchors.verticalCenterOffset: parent.height * 0.06
-        spacing: Kirigami.Units.largeSpacing
+        width: Math.min(parent.width - 48, 380)
+        spacing: 6
 
-        Rectangle {
+        // ---- who ----
+        Kirigami.Avatar {
             Layout.alignment: Qt.AlignHCenter
-            implicitWidth: Kirigami.Units.gridUnit * 5 + 6
-            implicitHeight: implicitWidth
-            radius: width / 2
-            color: "transparent"
-            border.width: 2
-            border.color: "#f2683a"
-            Kirigami.Avatar {
-                anchors.centerIn: parent
-                width: Kirigami.Units.gridUnit * 5
-                height: width
-                source: kuser.faceIconUrl.toString() !== "" ? kuser.faceIconUrl : "file:///usr/share/pixmaps/novaos-avatar.png"
-                name: kuser.fullName || kuser.loginName
-            }
+            Layout.preferredWidth: 88
+            Layout.preferredHeight: 88
+            source: kuser.faceIconUrl.toString() !== "" ? kuser.faceIconUrl : "file:///usr/share/pixmaps/novaos-avatar.png"
+            name: kuser.fullName || kuser.loginName
         }
         Text {
             Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: 6
+            text: kuser.fullName || kuser.loginName
             color: "#f1eee6"
             font.family: "Inter"
             font.pixelSize: 22
             font.weight: Font.DemiBold
-            text: kuser.fullName || kuser.loginName
         }
 
+        // countdown / warnings
         Text {
             Layout.alignment: Qt.AlignHCenter
+            Layout.preferredHeight: 22
             color: "#f3b651"
             font.family: "Inter"
-            font.pixelSize: 15
+            font.pixelSize: 14
             opacity: controls.hostRoot.countingDown ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: 220 } }
+            Behavior on opacity { NumberAnimation { duration: 200 } }
             text: {
                 switch (sdtype) {
                 case ShutdownType.ShutdownTypeReboot:
                     return i18ndp(controls.domain, "Restarting in 1 second", "Restarting in %1 seconds", controls.hostRoot.remainingTime);
                 case ShutdownType.ShutdownTypeNone:
                     return i18ndp(controls.domain, "Logging out in 1 second", "Logging out in %1 seconds", controls.hostRoot.remainingTime);
-                case ShutdownType.ShutdownTypeHalt:
                 default:
                     return i18ndp(controls.domain, "Shutting down in 1 second", "Shutting down in %1 seconds", controls.hostRoot.remainingTime);
                 }
             }
         }
-
         Text {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.maximumWidth: Kirigami.Units.gridUnit * 28
+            Layout.fillWidth: true
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WordWrap
             color: "#f2c36b"
             font.family: "Inter"
-            font.pixelSize: 14
+            font.pixelSize: 13
             visible: otherSessionsModel.count > 0 && (sdtype !== ShutdownType.ShutdownTypeNone || controls.showAllOptions)
             text: i18ndp(controls.domain,
                          "One other user is currently logged in. If the computer is shut down or restarted, that user may lose work.",
                          "%1 other users are currently logged in. If the computer is shut down or restarted, those users may lose work.",
                          otherSessionsModel.count)
         }
-
         Text {
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
             color: "#aeb3c8"
             font.family: "Inter"
-            font.pixelSize: 14
+            font.pixelSize: 13
             visible: rebootToFirmwareSetup || rebootToBootLoaderMenu
             text: rebootToFirmwareSetup
                   ? i18nd(controls.domain, "When restarted, the computer will enter the firmware setup screen.")
                   : i18nd(controls.domain, "When restarted, the computer will enter the boot loader menu.")
         }
 
-        RowLayout {
-            id: actions
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Kirigami.Units.gridUnit
-            spacing: Kirigami.Units.gridUnit
-
-            LogoutButton {
-                id: lockButton
-                icon.name: "system-lock-screen"
-                text: i18nd(controls.domain, "Lock")
-                onClicked: controls.hostRoot.lockScreenRequested()
-                visible: controls.showAllOptions
-            }
-            LogoutButton {
-                id: suspendButton
-                icon.name: "system-suspend"
-                text: i18ndc(controls.domain, "Suspend to RAM", "Slee&p")
-                onClicked: controls.hostRoot.sleepRequested()
-                visible: spdMethods.SuspendState && controls.showAllOptions
-            }
-            LogoutButton {
-                id: hibernateButton
-                icon.name: "system-suspend-hibernate"
-                text: i18nd(controls.domain, "&Hibernate")
-                onClicked: controls.hostRoot.hibernateRequested()
-                visible: spdMethods.HibernateState && controls.showAllOptions
-            }
-            LogoutButton {
-                id: rebootButton
-                icon.name: "system-reboot"
-                text: softwareUpdatePending ? i18ndc(controls.domain, "@action:button Keep short", "Install Updates and Restart")
-                                            : i18nd(controls.domain, "&Restart")
-                onClicked: softwareUpdatePending ? controls.hostRoot.rebootUpdateRequested() : controls.hostRoot.rebootRequested()
-                focus: sdtype === ShutdownType.ShutdownTypeReboot
-                visible: maysd && (sdtype === ShutdownType.ShutdownTypeReboot || controls.showAllOptions)
-            }
-            LogoutButton {
-                id: shutdownButton
-                danger: true
-                icon.name: "system-shutdown"
-                text: softwareUpdatePending ? i18ndc(controls.domain, "@action:button Keep short", "Install Updates and Shut Down")
-                                            : i18nd(controls.domain, "&Shut Down")
-                onClicked: softwareUpdatePending ? controls.hostRoot.haltUpdateRequested() : controls.hostRoot.haltRequested()
-                focus: sdtype === ShutdownType.ShutdownTypeHalt || controls.showAllOptions
-                visible: maysd && (sdtype === ShutdownType.ShutdownTypeHalt || controls.showAllOptions)
-            }
-            LogoutButton {
-                id: logoutButton
-                icon.name: "system-log-out"
-                text: i18nd(controls.domain, "&Log Out")
-                onClicked: controls.hostRoot.logoutRequested()
-                focus: sdtype === ShutdownType.ShutdownTypeNone
-                visible: canLogout && (sdtype === ShutdownType.ShutdownTypeNone || controls.showAllOptions)
-            }
+        // ---- session actions ----
+        LogoutButton {
+            id: lockButton
+            Layout.topMargin: 10
+            icon.name: "system-lock-screen"
+            text: i18nd(controls.domain, "Lock")
+            visible: controls.showAllOptions
+            onClicked: controls.hostRoot.lockScreenRequested()
+            KeyNavigation.down: logoutButton
+        }
+        LogoutButton {
+            id: logoutButton
+            icon.name: "system-log-out"
+            text: i18nd(controls.domain, "Sign out")
+            visible: canLogout && (sdtype === ShutdownType.ShutdownTypeNone || controls.showAllOptions)
+            highlighted: sdtype === ShutdownType.ShutdownTypeNone
+            focus: sdtype === ShutdownType.ShutdownTypeNone
+            onClicked: controls.hostRoot.logoutRequested()
+            KeyNavigation.up: lockButton
+            KeyNavigation.down: suspendButton.visible ? suspendButton : rebootButton
         }
 
-        // Cancel: a quiet text button under the tiles (Esc or a click anywhere also cancels)
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 1
+            Layout.topMargin: 6
+            Layout.bottomMargin: 6
+            color: Qt.rgba(1, 1, 1, 0.1)
+            visible: controls.showAllOptions
+        }
+
+        // ---- power actions ----
+        LogoutButton {
+            id: suspendButton
+            icon.name: "system-suspend"
+            text: i18ndc(controls.domain, "Suspend to RAM", "Slee&p")
+            visible: spdMethods.SuspendState && controls.showAllOptions
+            onClicked: controls.hostRoot.sleepRequested()
+            KeyNavigation.up: logoutButton
+            KeyNavigation.down: hibernateButton.visible ? hibernateButton : rebootButton
+        }
+        LogoutButton {
+            id: hibernateButton
+            icon.name: "system-suspend-hibernate"
+            text: i18nd(controls.domain, "&Hibernate")
+            visible: spdMethods.HibernateState && controls.showAllOptions
+            onClicked: controls.hostRoot.hibernateRequested()
+            KeyNavigation.up: suspendButton
+            KeyNavigation.down: rebootButton
+        }
+        LogoutButton {
+            id: rebootButton
+            icon.name: "system-reboot"
+            text: softwareUpdatePending ? i18ndc(controls.domain, "@action:button Keep short", "Install Updates and Restart")
+                                        : i18nd(controls.domain, "&Restart")
+            visible: maysd && (sdtype === ShutdownType.ShutdownTypeReboot || controls.showAllOptions)
+            highlighted: sdtype === ShutdownType.ShutdownTypeReboot
+            focus: sdtype === ShutdownType.ShutdownTypeReboot
+            onClicked: softwareUpdatePending ? controls.hostRoot.rebootUpdateRequested() : controls.hostRoot.rebootRequested()
+            KeyNavigation.up: hibernateButton.visible ? hibernateButton : (suspendButton.visible ? suspendButton : logoutButton)
+            KeyNavigation.down: shutdownButton
+        }
+        LogoutButton {
+            id: shutdownButton
+            danger: true
+            icon.name: "system-shutdown"
+            text: softwareUpdatePending ? i18ndc(controls.domain, "@action:button Keep short", "Install Updates and Shut Down")
+                                        : i18nd(controls.domain, "&Shut Down")
+            visible: maysd && (sdtype === ShutdownType.ShutdownTypeHalt || controls.showAllOptions)
+            highlighted: sdtype === ShutdownType.ShutdownTypeHalt
+            focus: sdtype === ShutdownType.ShutdownTypeHalt || controls.showAllOptions
+            onClicked: softwareUpdatePending ? controls.hostRoot.haltUpdateRequested() : controls.hostRoot.haltRequested()
+            KeyNavigation.up: rebootButton
+            KeyNavigation.down: cancel
+        }
+
+        // ---- cancel ----
         Rectangle {
             id: cancel
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Kirigami.Units.largeSpacing
-            implicitWidth: cancelText.implicitWidth + Kirigami.Units.gridUnit * 2
-            implicitHeight: cancelText.implicitHeight + Kirigami.Units.largeSpacing * 2
-            radius: height / 2
-            color: cancelMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.09) : "transparent"
+            Layout.topMargin: 18
+            implicitWidth: 140
+            implicitHeight: 40
+            radius: 20
+            color: cancelArea.containsMouse || activeFocus ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.06)
             border.width: 1
-            border.color: Qt.rgba(1, 1, 1, 0.12)
+            border.color: activeFocus ? Kirigami.Theme.highlightColor : Qt.rgba(1, 1, 1, 0.16)
+            activeFocusOnTab: true
+            Keys.onReturnPressed: controls.hostRoot.cancelRequested()
+            Keys.onEnterPressed: controls.hostRoot.cancelRequested()
+            KeyNavigation.up: shutdownButton
             Text {
-                id: cancelText
                 anchors.centerIn: parent
                 text: i18nd(controls.domain, "&Cancel").replace("&", "")
-                color: "#aeb3c8"
+                color: "#f1eee6"
                 font.family: "Inter"
                 font.pixelSize: 14
+                font.weight: Font.Medium
             }
-            MouseArea {
-                id: cancelMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: controls.hostRoot.cancelRequested()
+            MouseArea { id: cancelArea; anchors.fill: parent; hoverEnabled: true; onClicked: controls.hostRoot.cancelRequested() }
+        }
+    }
+
+    // Clock, quiet, bottom-left (as on the Windows security screen)
+    Column {
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        anchors.margins: 32
+        spacing: 0
+        Text {
+            id: t
+            color: "#f1eee6"
+            font.family: "Inter"
+            font.pixelSize: 40
+            font.weight: Font.Light
+        }
+        Text {
+            id: d
+            color: "#aeb3c8"
+            font.family: "Inter"
+            font.pixelSize: 15
+        }
+        Timer {
+            interval: 1000; running: true; repeat: true; triggeredOnStart: true
+            onTriggered: {
+                const now = new Date();
+                t.text = Qt.formatTime(now, Qt.locale().timeFormat(Locale.ShortFormat).replace(/:ss/, ""));
+                d.text = Qt.formatDate(now, "dddd, d MMMM");
             }
         }
     }

@@ -8,7 +8,7 @@
       <default>novaos-start</default>
     </entry>
     <entry name="pinned" type="StringList">
-      <default>org.kde.dolphin.desktop,firefox.desktop,org.kde.konsole.desktop,org.kde.discover.desktop,org.novaos.settings.desktop,org.kde.kate.desktop,org.kde.gwenview.desktop,org.kde.okular.desktop,org.kde.spectacle.desktop,org.kde.ark.desktop,org.kde.plasma-systemmonitor.desktop,org.kde.partitionmanager.desktop</default>
+      <default>org.kde.dolphin.desktop,firefox.desktop,onlyoffice-desktopeditors.desktop,org.kde.konsole.desktop,org.novaos.taskmanager.desktop,org.kde.discover.desktop,org.novaos.settings.desktop,org.kde.kate.desktop,org.kde.gwenview.desktop,org.kde.okular.desktop,org.kde.spectacle.desktop,org.kde.ark.desktop,org.kde.plasma-systemmonitor.desktop,org.kde.partitionmanager.desktop</default>
     </entry>
   </group>
 </kcfg>

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Task Manager
+GenericName=NovaOS Task Manager
+Comment=See running apps, end tasks and watch CPU, memory, disk and network
+Exec=novaos-taskmanager
+Icon=utilities-system-monitor
+Categories=System;Monitor;
+Keywords=task manager;processes;end task;kill;cpu;memory;performance;
+StartupWMClass=qml
+X-KDE-Shortcuts=Ctrl+Shift+Esc

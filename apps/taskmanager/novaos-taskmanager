@@ -1,0 +1,4 @@
+#!/bin/sh
+# Launch NovaOS Task Manager (QML app run by Qt's qml runtime).
+export QT_QUICK_CONTROLS_STYLE="${QT_QUICK_CONTROLS_STYLE:-org.kde.desktop}"
+exec /usr/lib/qt6/bin/qml /usr/share/novaos/taskmanager/Main.qml -- "$@"

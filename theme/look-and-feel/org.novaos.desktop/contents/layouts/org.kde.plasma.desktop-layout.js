@@ -1,9 +1,9 @@
 // NovaOS "Twilight" layout for Plasma (runs once, on a user's first Plasma start).
 //
-//  Top bar (floating, three islands):
-//            (app · window title)  ·····  (◔ ddd d MMM  HH:mm ◔)  ·····  [tray] [power]
-//  Dock:     floating, centered, sized to its icons, moves out of the way of windows:
-//            [NovaOS Start] [pinned / running apps]
+//  Top bar (slim, solid):
+//      [mark  App  window title]  ·····  [ddd d MMM  HH:mm]  ·····  [CPU ▬ 5%  RAM ▬ 23%] [tray] [power]
+//  Dock:   floating, centered, sized to its icons, moves out of the way of windows:
+//      [NovaOS Start] [pinned / running apps]
 //
 // Kept deliberately small: every applet costs memory in plasmashell.
 
@@ -20,21 +20,24 @@ for (var i = 0; i < allDesktops.length; i++) {
 // ---------------- Top bar ----------------
 var top = new Panel;
 top.location = "top";
-top.height = 2 * Math.ceil(gridUnit * 2.0 / 2);
-top.floating = true;
+top.height = 2 * Math.ceil(gridUnit * 1.55 / 2);
+top.floating = false;
 top.hiding = "none";
 
 top.addWidget("org.novaos.activewindow");
 top.addWidget("org.kde.plasma.panelspacer");
 top.addWidget("org.novaos.topclock");
 top.addWidget("org.kde.plasma.panelspacer");
+top.addWidget("org.novaos.meters");
 
 // System tray with only the essentials. Each tray item is a full applet inside
-// plasmashell (and some start daemons, e.g. KDE Connect), so the list is explicit.
+// plasmashell, and some start daemons (KDE Connect), so the list is explicit.
+// "knownItems" must also name the ones we hide: the tray auto-adds any item it
+// has never seen before.
 var tray = top.addWidget("org.kde.plasma.systemtray");
 var trayContainment = desktopById(tray.readConfig("SystrayContainmentId"));
 if (trayContainment) {
-    var items = [
+    var shown = [
         "org.kde.plasma.notifications",
         "org.kde.plasma.volume",
         "org.kde.plasma.networkmanagement",
@@ -46,9 +49,22 @@ if (trayContainment) {
         "org.kde.plasma.keyboardlayout",
         "org.kde.plasma.mediacontroller"
     ];
+    var hidden = [
+        "org.kde.kdeconnect",
+        "org.kde.plasma.printmanager",
+        "org.kde.plasma.vault",
+        "org.kde.plasma.cameraindicator",
+        "org.kde.plasma.keyboardindicator",
+        "org.kde.plasma.manage-inputmethod",
+        "org.kde.plasma.nightlight",
+        "org.kde.plasma.weather",
+        "org.kde.kscreen",
+        "org.kde.plasma.addons.katesessions",
+        "org.kde.plasma.vault"
+    ];
     trayContainment.currentConfigGroup = ["General"];
-    trayContainment.writeConfig("extraItems", items);
-    trayContainment.writeConfig("knownItems", items);
+    trayContainment.writeConfig("extraItems", shown);
+    trayContainment.writeConfig("knownItems", shown.concat(hidden));
 }
 top.addWidget("org.kde.plasma.lock_logout");
 
@@ -69,7 +85,7 @@ tasks.writeConfig("launchers", [
     "applications:org.kde.dolphin.desktop",
     "applications:firefox.desktop",
     "applications:org.kde.konsole.desktop",
-    "applications:org.kde.discover.desktop",
+    "applications:onlyoffice-desktopeditors.desktop",
     "applications:org.novaos.settings.desktop"
 ]);
 tasks.writeConfig("iconSpacing", 2);

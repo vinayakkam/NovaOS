@@ -30,4 +30,6 @@ file_permissions=(
   ["/usr/local/bin/novaos-memreport"]="0:0:755"
   ["/usr/local/bin/novaos-settings"]="0:0:755"
   ["/usr/local/bin/novaos-settings-helper"]="0:0:755"
+  ["/usr/local/bin/novaos-taskmanager"]="0:0:755"
+  ["/usr/local/bin/novaos-shell"]="0:0:755"
 )

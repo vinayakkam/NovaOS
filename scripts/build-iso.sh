@@ -163,6 +163,15 @@ install -Dm755 "$REPO/apps/settings/novaos-settings-helper" "$AIR/usr/local/bin/
 install -Dm644 "$REPO/apps/settings/org.novaos.settings.desktop" "$AIR/usr/share/applications/org.novaos.settings.desktop"
 echo "0.1" > "$AIR/usr/share/novaos/version"
 
+log "Installing NovaOS Task Manager and terminal greeting"
+install -Dm644 "$REPO/apps/taskmanager/Main.qml" "$AIR/usr/share/novaos/taskmanager/Main.qml"
+install -Dm755 "$REPO/apps/taskmanager/novaos-taskmanager" "$AIR/usr/local/bin/novaos-taskmanager"
+install -Dm644 "$REPO/apps/taskmanager/org.novaos.taskmanager.desktop" "$AIR/usr/share/applications/org.novaos.taskmanager.desktop"
+install -Dm644 "$REPO/theme/terminal/fastfetch.jsonc" "$AIR/usr/share/novaos/terminal/fastfetch.jsonc"
+install -Dm644 "$REPO/theme/terminal/novaos-logo.txt" "$AIR/usr/share/novaos/terminal/novaos-logo.txt"
+install -Dm755 "$REPO/theme/terminal/novaos-shell" "$AIR/usr/local/bin/novaos-shell"
+install -Dm644 "$REPO/theme/terminal/NovaOS.profile" "$AIR/usr/share/konsole/NovaOS.profile"
+
 WP="$AIR/usr/share/wallpapers/NovaOS"
 install -d "$WP/contents/images"
 install -m644 "$REPO/theme/wallpapers/NovaOS/metadata.json" "$WP/metadata.json"

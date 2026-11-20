@@ -35,8 +35,9 @@ QQC2.ApplicationWindow {
     readonly property color textColor: "#f1eee6"
     readonly property color subtext: "#aeb3c8"
     readonly property color dim: "#727892"
-    readonly property color accent: "#f2683a"
-    readonly property color accent2: "#f3b651"
+    // Follows the system accent colour, so changes show up immediately
+    readonly property color accent: Kirigami.Theme.highlightColor
+    readonly property color accent2: Qt.lighter(accent, 1.3)
     readonly property string helper: "/usr/local/bin/novaos-settings-helper"
 
     property string page: {
@@ -231,7 +232,7 @@ QQC2.ApplicationWindow {
         implicitWidth: chl.implicitWidth + 24
         implicitHeight: 32
         radius: 16
-        color: ch.selected ? Qt.rgba(0.95, 0.41, 0.23, 0.22) : (cha.containsMouse ? app.cardHover : Qt.rgba(1, 1, 1, 0.06))
+        color: ch.selected ? Qt.rgba(app.accent.r, app.accent.g, app.accent.b, 0.22) : (cha.containsMouse ? app.cardHover : Qt.rgba(1, 1, 1, 0.06))
         border.color: ch.selected ? app.accent : app.border
         Label { id: chl; anchors.centerIn: parent; text: ch.text; font.pixelSize: 13 }
         MouseArea { id: cha; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ch.clicked() }

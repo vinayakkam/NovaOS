@@ -1,0 +1,14 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [{ "Name": "NovaOS Project" }],
+        "Category": "System Information",
+        "Description": "NovaOS top bar: compact CPU and memory meters",
+        "Icon": "utilities-system-monitor",
+        "Id": "org.novaos.meters",
+        "License": "GPL-2.0-or-later",
+        "Name": "NovaOS Meters",
+        "Version": "1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

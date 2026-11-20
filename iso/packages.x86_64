@@ -104,6 +104,7 @@ wine-mono
 wine-gecko
 
 # --- CLI basics ---
+fastfetch
 git
 nano
 vim

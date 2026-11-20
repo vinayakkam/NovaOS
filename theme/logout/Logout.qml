@@ -106,21 +106,20 @@ Item {
     // Twilight backdrop: deep navy veil with a warm glow, over the dimmed desktop.
     Rectangle {
         anchors.fill: parent
-        opacity: 0.93
+        opacity: 0.97
         gradient: Gradient {
-            GradientStop { position: 0.0; color: "#101a33" }
-            GradientStop { position: 0.6; color: "#0d1428" }
-            GradientStop { position: 1.0; color: "#1a1023" }
+            GradientStop { position: 0.0; color: "#111a35" }
+            GradientStop { position: 1.0; color: "#0a1022" }
         }
     }
+    // a single soft glow behind the centre column, in the accent colour
     Rectangle {
-        width: Math.max(parent.width, parent.height) * 0.7
+        anchors.centerIn: parent
+        width: Math.min(parent.width, parent.height) * 0.9
         height: width
         radius: width / 2
-        x: parent.width * 0.55
-        y: parent.height * 0.45
-        color: "#f2683a"
-        opacity: 0.07
+        color: Kirigami.Theme.highlightColor
+        opacity: 0.05
     }
     MouseArea {
         anchors.fill: parent

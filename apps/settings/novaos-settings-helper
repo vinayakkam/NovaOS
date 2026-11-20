@@ -75,7 +75,21 @@ theme-get)
     echo "accent=$(kreadconfig6 --file kdeglobals --group General --key AccentColor)"
     ;;
 theme-set)       plasma-apply-colorscheme "$1" >/dev/null ;;           # Twilight | BreezeLight
-accent-set)      plasma-apply-colorscheme --accent-color "$1" >/dev/null ;;
+accent-set)
+    # plasma-apply-colorscheme --accent-color is a no-op when the scheme is already
+    # active, so store the accent ourselves and re-apply the scheme to recolour apps.
+    hex=$(echo "$1" | tr -d '#' | tr 'A-F' 'a-f')
+    case "$hex" in [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]) ;; *) echo "bad colour" >&2; exit 2 ;; esac
+    r=$(printf '%d' "0x$(echo "$hex" | cut -c1-2)")
+    g=$(printf '%d' "0x$(echo "$hex" | cut -c3-4)")
+    b=$(printf '%d' "0x$(echo "$hex" | cut -c5-6)")
+    kwriteconfig6 --file kdeglobals --group General --key AccentColor "$r,$g,$b"
+    kwriteconfig6 --file kdeglobals --group General --key accentColorFromWallpaper false
+    scheme=$(kreadconfig6 --file kdeglobals --group General --key ColorScheme --default Twilight)
+    [ "$scheme" = BreezeDark ] && other=BreezeLight || other=BreezeDark
+    plasma-apply-colorscheme "$other" >/dev/null 2>&1
+    plasma-apply-colorscheme "$scheme" >/dev/null 2>&1
+    ;;
 wallpapers)
     for d in /usr/share/wallpapers/*/contents/images; do
         f=$(ls -1 "$d" 2>/dev/null | sort -V | tail -n1)
