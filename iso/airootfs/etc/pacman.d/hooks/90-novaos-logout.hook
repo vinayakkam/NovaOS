@@ -1,0 +1,12 @@
+# Keeps the NovaOS logout screen in step with plasma-desktop (see novaos-sync-shell).
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Package
+Target = plasma-desktop
+
+[Action]
+Description = Updating NovaOS logout and lock screens...
+When = PostTransaction
+Exec = /usr/local/bin/novaos-sync-shell
