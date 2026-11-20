@@ -1,0 +1,5 @@
+[Desktop Entry]
+# GTK global-menu bridge for X11 apps; not used by the NovaOS layout.
+Type=Application
+Name=GMenu DBusMenu Proxy
+Hidden=true

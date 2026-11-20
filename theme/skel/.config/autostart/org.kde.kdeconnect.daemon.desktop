@@ -1,0 +1,5 @@
+[Desktop Entry]
+# KDE Connect is installed but starts only when opened (Start > KDE Connect).
+Type=Application
+Name=KDE Connect
+Hidden=true

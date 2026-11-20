@@ -1,0 +1,5 @@
+[Desktop Entry]
+# Update notifier: ~100 MB resident. Discover still checks when opened.
+Type=Application
+Name=Discover Notifier
+Hidden=true

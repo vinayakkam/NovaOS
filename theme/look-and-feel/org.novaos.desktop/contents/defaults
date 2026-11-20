@@ -1,18 +1,19 @@
 [kdeglobals][KDE]
-widgetStyle=kvantum
+widgetStyle=Breeze
 
 [kdeglobals][General]
-ColorScheme=FluentLight
+ColorScheme=Twilight
+AccentColor=242,104,58
 
 [kdeglobals][Icons]
-Theme=Fluent
+Theme=NovaOS
 
 [plasmarc][Theme]
-name=Fluent-round-light
+name=default
 
 [kwinrc][org.kde.kdecoration2]
-library=org.kde.kwin.aurorae
-theme=__aurorae__svg__Fluent-round-light
+library=org.kde.breeze
+theme=Breeze
 
 [kcminputrc][Mouse]
 cursorTheme=breeze_cursors
@@ -21,4 +22,4 @@ cursorTheme=breeze_cursors
 Theme=org.kde.breeze.desktop
 
 [Wallpaper]
-Image=NovaOS
+Image=Twilight

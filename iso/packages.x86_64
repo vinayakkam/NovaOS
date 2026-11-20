@@ -85,15 +85,20 @@ plasma-systemmonitor
 xdg-desktop-portal-kde
 xdg-user-dirs
 xdg-utils
-kvantum
+discover
+zram-generator
 
 # --- Fonts ---
 inter-font
 noto-fonts
 noto-fonts-emoji
+ttf-jetbrains-mono-nerd
 
 # --- Apps ---
 firefox
+# from the build-time [novaos] repo (packages/onlyoffice-bin)
+onlyoffice-bin
+ttf-carlito
 wine
 wine-mono
 wine-gecko

@@ -14,6 +14,8 @@ pacman_conf="pacman.conf"
 airootfs_image_type="squashfs"
 # zstd builds much faster than releng's xz at a ~10% size cost; switch to xz for releases.
 airootfs_image_tool_options=('-comp' 'zstd' '-Xcompression-level' '15' '-b' '1M')
+# Read the live image from the boot medium instead of copying ~2.5 GB of it into RAM.
+kernel_params_x86_64="copytoram=n"
 file_permissions=(
   ["/etc/shadow"]="0:0:400"
   ["/etc/sudoers.d/10-novaos-live"]="0:0:440"
@@ -24,4 +26,8 @@ file_permissions=(
   ["/usr/local/bin/Installation_guide"]="0:0:755"
   ["/usr/local/bin/livecd-sound"]="0:0:755"
   ["/usr/local/bin/novaos-live-user"]="0:0:755"
+  ["/usr/local/bin/novaos-sync-shell"]="0:0:755"
+  ["/usr/local/bin/novaos-memreport"]="0:0:755"
+  ["/usr/local/bin/novaos-settings"]="0:0:755"
+  ["/usr/local/bin/novaos-settings-helper"]="0:0:755"
 )

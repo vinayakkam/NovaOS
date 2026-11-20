@@ -1,20 +1,22 @@
 
-# --- NovaOS overrides (build-iso.sh prepends the FluentLight color scheme to this file) ---
+# --- NovaOS overrides (build-iso.sh prepends theme/colors/Twilight.colors to this file) ---
 [General]
-ColorScheme=FluentLight
+ColorScheme=Twilight
+AccentColor=242,104,58
 font=Inter,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
 menuFont=Inter,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
 toolBarFont=Inter,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
 smallestReadableFont=Inter,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-fixed=Noto Sans Mono,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+fixed=JetBrainsMono Nerd Font,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
 
 [WM]
 activeFont=Inter,10,-1,5,600,0,0,0,0,0,0,0,0,0,0,1
 
 [KDE]
 LookAndFeelPackage=org.novaos.desktop
-widgetStyle=kvantum
+widgetStyle=Breeze
 SingleClick=false
+AnimationDurationFactor=0.7
 
 [Icons]
-Theme=Fluent
+Theme=NovaOS

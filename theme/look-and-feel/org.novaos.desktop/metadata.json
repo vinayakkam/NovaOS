@@ -3,11 +3,11 @@
     "KPlugin": {
         "Authors": [{ "Name": "NovaOS Project" }],
         "Category": "",
-        "Description": "NovaOS default desktop: centered floating taskbar, Fluent styling, Spotlight-style search",
+        "Description": "NovaOS Twilight: top bar with clock and CPU/RAM meters, centered dodging dock, navy and amber colours",
         "Id": "org.novaos.desktop",
         "License": "GPL-2.0-or-later",
-        "Name": "NovaOS",
-        "Version": "0.1"
+        "Name": "NovaOS Twilight",
+        "Version": "0.2"
     },
     "X-Plasma-APIVersion": "2"
 }

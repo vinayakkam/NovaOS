@@ -1,2 +1,3 @@
+# "default" is Breeze, which takes its colours from the Twilight colour scheme
 [Theme]
-name=Fluent-round-light
+name=default

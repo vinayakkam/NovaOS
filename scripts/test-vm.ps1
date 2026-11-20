@@ -65,7 +65,8 @@ Invoke-VBox modifyvm $VmName `
     --graphicscontroller vmsvga --accelerate-3d off `
     --mouse usbtablet --nic1 nat --rtc-use-utc on `
     --audio-enabled on --audio-out on --clipboard-mode bidirectional `
-    --boot1 dvd --boot2 disk --boot3 none --boot4 none
+    --boot1 dvd --boot2 disk --boot3 none --boot4 none `
+    --uart1 0x3F8 4 --uart-mode1 file (Join-Path $vmDir 'serial.log')
 Invoke-VBox createmedium disk --filename $disk --size ($DiskGB * 1024) --format VDI --variant Standard
 Invoke-VBox storagectl $VmName --name SATA --add sata --controller IntelAhci --portcount 2 --bootable on
 Invoke-VBox storageattach $VmName --storagectl SATA --port 0 --device 0 --type hdd --medium $disk

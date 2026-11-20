@@ -1,0 +1,5 @@
+[Desktop Entry]
+# Old X11 tray-icon bridge; on Wayland it only keeps Xwayland busy.
+Type=Application
+Name=XEmbed SNI Proxy
+Hidden=true

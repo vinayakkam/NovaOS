@@ -1,6 +1,6 @@
 [org.kde.kdecoration2]
-library=org.kde.kwin.aurorae
-theme=__aurorae__svg__Fluent-round-light
+library=org.kde.breeze
+theme=Breeze
 ButtonsOnLeft=
 ButtonsOnRight=IAX
 
@@ -8,10 +8,19 @@ ButtonsOnRight=IAX
 [Effect-overview]
 BorderActivate=7
 
+[Desktops]
+Number=4
+Rows=1
+
+# Memory: blur/contrast keep extra full-screen buffers (in system RAM when there is
+# no GPU, e.g. in a VM). Panels stay translucent; turn blur on in Desktop Effects.
 [Plugins]
-blurEnabled=true
-contrastEnabled=true
+blurEnabled=false
+contrastEnabled=false
+slidebackEnabled=false
+wobblywindowsEnabled=false
+magiclampEnabled=false
+kwin4_effect_geometry_changeEnabled=false
 
 [Windows]
-# Double-click title bar maximizes, as on Windows
 TitlebarDoubleClickCommand=Maximize

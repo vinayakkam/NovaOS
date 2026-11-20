@@ -1,11 +1,14 @@
-// NovaOS default Plasma layout (runs once, the first time a user's Plasma starts).
+// NovaOS "Twilight" layout for Plasma (runs once, on a user's first Plasma start).
 //
-// One floating, full-width bottom panel. Flexible spacers on both sides keep the
-// launcher + pinned apps centered; tray and clock sit at the right edge.
+//  Top bar (floating, three islands):
+//            (app · window title)  ·····  (◔ ddd d MMM  HH:mm ◔)  ·····  [tray] [power]
+//  Dock:     floating, centered, sized to its icons, moves out of the way of windows:
+//            [NovaOS Start] [pinned / running apps]
+//
+// Kept deliberately small: every applet costs memory in plasmashell.
 
-var WALLPAPER = "/usr/share/wallpapers/NovaOS/";
+var WALLPAPER = "/usr/share/wallpapers/Twilight/";
 
-// Desktop wallpaper
 var allDesktops = desktops();
 for (var i = 0; i < allDesktops.length; i++) {
     var d = allDesktops[i];
@@ -14,39 +17,60 @@ for (var i = 0; i < allDesktops.length; i++) {
     d.writeConfig("Image", "file://" + WALLPAPER);
 }
 
-// Taskbar
-var panel = new Panel;
-panel.location = "bottom";
-panel.height = 2 * Math.ceil(gridUnit * 2.4 / 2);
-panel.floating = true;
-panel.hiding = "none";
+// ---------------- Top bar ----------------
+var top = new Panel;
+top.location = "top";
+top.height = 2 * Math.ceil(gridUnit * 2.0 / 2);
+top.floating = true;
+top.hiding = "none";
 
-panel.addWidget("org.kde.plasma.panelspacer");   // flexible: pushes the center group
+top.addWidget("org.novaos.activewindow");
+top.addWidget("org.kde.plasma.panelspacer");
+top.addWidget("org.novaos.topclock");
+top.addWidget("org.kde.plasma.panelspacer");
 
-var launcher = panel.addWidget("org.kde.plasma.kickoff");
-launcher.currentConfigGroup = ["General"];
-launcher.writeConfig("icon", "novaos-start");
-launcher.writeConfig("favoritesDisplay", 0);       // grid of pinned apps
-launcher.writeConfig("applicationsDisplay", 1);    // list of all apps
-launcher.writeConfig("primaryActions", 0);
+// System tray with only the essentials. Each tray item is a full applet inside
+// plasmashell (and some start daemons, e.g. KDE Connect), so the list is explicit.
+var tray = top.addWidget("org.kde.plasma.systemtray");
+var trayContainment = desktopById(tray.readConfig("SystrayContainmentId"));
+if (trayContainment) {
+    var items = [
+        "org.kde.plasma.notifications",
+        "org.kde.plasma.volume",
+        "org.kde.plasma.networkmanagement",
+        "org.kde.plasma.bluetooth",
+        "org.kde.plasma.battery",
+        "org.kde.plasma.brightness",
+        "org.kde.plasma.devicenotifier",
+        "org.kde.plasma.clipboard",
+        "org.kde.plasma.keyboardlayout",
+        "org.kde.plasma.mediacontroller"
+    ];
+    trayContainment.currentConfigGroup = ["General"];
+    trayContainment.writeConfig("extraItems", items);
+    trayContainment.writeConfig("knownItems", items);
+}
+top.addWidget("org.kde.plasma.lock_logout");
 
-var tasks = panel.addWidget("org.kde.plasma.icontasks");
+// ---------------- Dock ----------------
+var dock = new Panel;
+dock.location = "bottom";
+dock.height = 2 * Math.ceil(gridUnit * 2.7 / 2);
+dock.floating = true;
+dock.alignment = "center";
+dock.lengthMode = "fit";
+dock.hiding = "dodgewindows";
+
+dock.addWidget("org.novaos.startmenu");
+
+var tasks = dock.addWidget("org.kde.plasma.icontasks");
 tasks.currentConfigGroup = ["General"];
 tasks.writeConfig("launchers", [
     "applications:org.kde.dolphin.desktop",
     "applications:firefox.desktop",
     "applications:org.kde.konsole.desktop",
-    "applications:systemsettings.desktop"
+    "applications:org.kde.discover.desktop",
+    "applications:org.novaos.settings.desktop"
 ]);
 tasks.writeConfig("iconSpacing", 2);
-
-panel.addWidget("org.kde.plasma.panelspacer");   // flexible
-
-panel.addWidget("org.kde.plasma.systemtray");
-
-var clock = panel.addWidget("org.kde.plasma.digitalclock");
-clock.currentConfigGroup = ["Appearance"];
-clock.writeConfig("showDate", true);
-clock.writeConfig("dateDisplayFormat", "BelowTime");
-
-panel.addWidget("org.kde.plasma.showdesktop");
+tasks.writeConfig("indicateAudioStreams", false);

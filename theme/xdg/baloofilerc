@@ -1,0 +1,4 @@
+# File indexing off by default: it is the single biggest background memory user.
+# Turn it on in System Settings > Search > File Search.
+[Basic Settings]
+Indexing-Enabled=false

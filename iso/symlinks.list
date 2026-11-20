@@ -2,7 +2,7 @@
 # (Git on Windows/NTFS cannot store them reliably, so they live here as text.)
 # Format: <link path inside airootfs>  <link target>
 
-/etc/localtime                                                       /usr/share/zoneinfo/UTC
+# /etc/localtime is set by build-iso.sh from $TIMEZONE (default Asia/Kolkata)
 /etc/systemd/system-generators/systemd-gpt-auto-generator            /dev/null
 
 # Desktop
@@ -13,12 +13,20 @@
 /etc/systemd/system/multi-user.target.wants/NetworkManager.service   /usr/lib/systemd/system/NetworkManager.service
 /etc/systemd/system/dbus-org.freedesktop.nm-dispatcher.service       /usr/lib/systemd/system/NetworkManager-dispatcher.service
 /etc/systemd/system/network-online.target.wants/NetworkManager-wait-online.service /usr/lib/systemd/system/NetworkManager-wait-online.service
-/etc/systemd/system/multi-user.target.wants/ModemManager.service     /usr/lib/systemd/system/ModemManager.service
-/etc/systemd/system/dbus-org.freedesktop.ModemManager1.service       /usr/lib/systemd/system/ModemManager.service
+# ModemManager is installed but off to save RAM (systemctl enable --now ModemManager for WWAN).
+/etc/systemd/system/timers.target.wants/novaos-memreport.timer       ../novaos-memreport.timer
 /etc/systemd/system/bluetooth.target.wants/bluetooth.service         /usr/lib/systemd/system/bluetooth.service
 /etc/systemd/system/dbus-org.bluez.service                           /usr/lib/systemd/system/bluetooth.service
 /etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service   /usr/lib/systemd/system/systemd-timesyncd.service
 /etc/systemd/system/dbus-org.freedesktop.timesync1.service           /usr/lib/systemd/system/systemd-timesyncd.service
+
+# RAM: Plasma starts these as systemd user units, which ignore ~/.config/autostart.
+# Masked: accessibility daemon (re-enable: systemctl --user unmask plasma-kaccess),
+# X11-only tray/menu bridges, and KDE Connect's login autostart (it still starts on use).
+/etc/systemd/user/plasma-kaccess.service                             /dev/null
+/etc/systemd/user/plasma-xembedsniproxy.service                      /dev/null
+/etc/systemd/user/plasma-gmenudbusmenuproxy.service                  /dev/null
+/etc/systemd/user/app-org.kde.kdeconnect.daemon@autostart.service    /dev/null
 
 # Live-medium helpers from releng
 /etc/systemd/system/multi-user.target.wants/pacman-init.service      ../pacman-init.service
