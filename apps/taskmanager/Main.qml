@@ -44,7 +44,12 @@ QQC2.ApplicationWindow {
     readonly property color diskColor: "#5fd39b"
     readonly property color netColor: "#5eb7d0"
 
-    property string page: "processes"
+    // optional first argument: processes | performance | startup
+    property string page: {
+        const a = Qt.application.arguments;
+        for (let i = 0; i < a.length; i++) if (["processes", "performance", "startup"].includes(a[i])) return a[i];
+        return "processes";
+    }
     property var selectedPids: []
     property string selectedName: ""
     property string filter: ""

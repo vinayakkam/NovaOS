@@ -21,7 +21,9 @@ for (var i = 0; i < allDesktops.length; i++) {
 var top = new Panel;
 top.location = "top";
 top.height = 2 * Math.ceil(gridUnit * 1.55 / 2);
-top.floating = false;
+// Dynamic: floats as a slim translucent strip over the desktop; when a window is
+// maximised it snaps to the edge and turns solid (Plasma's adaptive opacity).
+top.floating = true;
 top.hiding = "none";
 
 top.addWidget("org.novaos.activewindow");

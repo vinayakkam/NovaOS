@@ -43,37 +43,53 @@ PlasmoidItem {
     property string page: "home"   // home | all
     property string query: ""
 
-    onExpandedChanged: {
-        if (expanded) {
-            query = "";
-            page = "home";
+    onExpandedChanged: () => {
+        if (root.expanded) {
+            root.query = "";
+            root.page = "home";
         }
     }
 
-    function isPinned(id) {
-        const strip = s => String(s || "").replace(/^applications:/, "");
-        const want = strip(id);
-        return (Plasmoid.configuration.pinned || []).some(p => strip(p) === want);
-    }
-    function togglePin(id) {
-        const strip = s => String(s || "").replace(/^applications:/, "");
-        const want = strip(id);
-        const cur = (Plasmoid.configuration.pinned || []).slice();
-        const i = cur.findIndex(p => strip(p) === want);
-        if (i >= 0) cur.splice(i, 1); else cur.push(want);
-        Plasmoid.configuration.pinned = cur;
-    }
-
-    // ---------- Data ----------
-    Kicker.AppsModel {
-        id: appsModel
-        autoPopulate: true
+    // ---------- Data (the same models Kickoff uses) ----------
+    // RootModel row 0 is the flat, sorted "All applications" list; its
+    // favoritesModel stores the pins (Plasma's activity-aware favourites).
+    Kicker.RootModel {
+        id: rootModel
+        autoPopulate: false
+        appletInterface: root
         flat: true
         sorted: true
         showSeparators: false
-        showTopLevelItems: true
-        paginate: false
-        appletInterface: root
+        showAllApps: true
+        showAllAppsCategorized: false
+        showRecentApps: false
+        showRecentDocs: false
+        showPowerSession: false
+        showFavoritesPlaceholder: false
+        Component.onCompleted: refresh()
+    }
+    readonly property var appsModel: rootModel.count > 0 ? rootModel.modelForRow(0) : null
+
+    // Pins: a plain list in this widget's config (defaults in config/main.xml),
+    // shown through Kicker's simple favourites model (no activity service needed).
+    function pinId(id) {
+        const s = String(id || "").replace(/^applications:/, "").replace(/^.*\//, "");
+        return s.endsWith(".desktop") ? s : s + ".desktop";
+    }
+    readonly property var pinList: (Plasmoid.configuration.pinned || []).map(p => "applications:" + pinId(p))
+    Kicker.SimpleFavoritesModel {
+        id: pinsModel
+        favorites: root.pinList
+    }
+
+    function isPinned(id) { return (Plasmoid.configuration.pinned || []).some(p => pinId(p) === pinId(id)); }
+    function togglePin(id) {
+        if (!id) return;
+        const want = pinId(id);
+        const cur = (Plasmoid.configuration.pinned || []).map(p => pinId(p));
+        const i = cur.indexOf(want);
+        if (i >= 0) cur.splice(i, 1); else cur.push(want);
+        Plasmoid.configuration.pinned = cur;
     }
 
     Kicker.RecentUsageModel {
@@ -87,7 +103,7 @@ PlasmoidItem {
         query: root.query
         runners: [
             "krunner_services", "krunner_systemsettings", "calculator", "unitconverter",
-            "krunner_recentdocuments", "locations", "baloosearch", "krunner_sessions", "krunner_powerdevil"
+            "krunner_recentdocuments", "locations", "krunner_sessions", "krunner_powerdevil"
         ]
     }
     readonly property var results: runnerModel.count > 0 ? runnerModel.modelForRow(0) : null
@@ -150,7 +166,7 @@ PlasmoidItem {
                 }
             }
             Rectangle {
-                readonly property real d: mark.tile * (compact.containsMouse || root.expanded ? 0.92 : 0.8)
+                property real d: mark.tile * (compact.containsMouse || root.expanded ? 0.92 : 0.8)
                 width: d; height: d; radius: d / 2
                 x: mark.size - mark.tile + (mark.tile - d) / 2
                 y: (mark.tile - d) / 2
@@ -362,24 +378,23 @@ PlasmoidItem {
                         Pill { label: i18n("All apps"); iconName: "go-next"; onClicked: root.page = "all" }
                     }
 
-                    // Pinned apps: every app row is a cheap Loader; only pinned ones load a tile.
+                    // Pinned apps, in pin order. Right-click a tile to unpin.
                     Flow {
                         id: pinnedFlow
                         Layout.fillWidth: true
                         readonly property real cell: width / 6
                         Repeater {
-                            model: appsModel
-                            delegate: Loader {
+                            model: pinsModel
+                            delegate: Item {
                                 required property int index
                                 required property var model
-                                active: root.isPinned(model.favoriteId)
-                                visible: active
-                                width: active ? pinnedFlow.cell : 0
-                                height: active ? 92 : 0
-                                sourceComponent: Tile {
+                                width: pinnedFlow.cell
+                                height: 92
+                                visible: index < 18
+                                Tile {
                                     width: pinnedFlow.cell - 6
                                     height: 86
-                                    onActivated: { appsModel.trigger(index, "", null); root.expanded = false; }
+                                    onActivated: { pinsModel.trigger(index, "", null); root.expanded = false; }
                                     onContextRequested: root.togglePin(model.favoriteId)
                                     Column {
                                         anchors.centerIn: parent
