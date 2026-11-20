@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1d2a4d"/><stop offset="1" stop-color="#0d1428"/>
+    </linearGradient>
+    <linearGradient id="fg" gradientUnits="userSpaceOnUse" x1="12" y1="12" x2="36" y2="36">
+      <stop offset="0" stop-color="#f2683a"/><stop offset="1" stop-color="#cd4126"/>
+    </linearGradient>
+    <linearGradient id="hl" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect x="3" y="4" width="42" height="42" rx="11" fill="#000" opacity=".25"/>
+  <rect x="3" y="3" width="42" height="42" rx="11" fill="url(#bg)"/>
+  <rect x="3" y="3" width="42" height="42" rx="11" fill="url(#hl)"/>
+  <rect x="3.5" y="3.5" width="41" height="41" rx="10.5" fill="none" stroke="#fff" stroke-opacity=".10"/>
+  <g fill="url(#fg)" stroke="url(#fg)"><path fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M16 12.5h11l6 6v17H16z"/><path fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M27 12.5v6h6"/>
+             <path fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M20 25h9M20 30h7"/></g>
+</svg>
