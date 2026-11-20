@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: Install build dependencies
         run: |
-          pacman -Syu --noconfirm --needed archiso git rsync librsvg
+          pacman -Syu --noconfirm --needed archiso git rsync librsvg base-devel
 
       - uses: actions/checkout@v4
 
