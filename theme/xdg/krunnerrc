@@ -1,0 +1,4 @@
+# Spotlight-style search: free-floating centered window; typing on the desktop opens it.
+[General]
+FreeFloating=true
+ActivateWhenTypingOnDesktop=true

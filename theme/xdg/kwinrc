@@ -1,0 +1,17 @@
+[org.kde.kdecoration2]
+library=org.kde.kwin.aurorae
+theme=__aurorae__svg__Fluent-round-light
+ButtonsOnLeft=
+ButtonsOnRight=IAX
+
+# macOS-style hot corner: top-left opens Overview (7 = top-left screen edge)
+[Effect-overview]
+BorderActivate=7
+
+[Plugins]
+blurEnabled=true
+contrastEnabled=true
+
+[Windows]
+# Double-click title bar maximizes, as on Windows
+TitlebarDoubleClickCommand=Maximize

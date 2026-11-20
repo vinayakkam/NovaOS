@@ -1,0 +1,9 @@
+{
+    "KPackageStructure": "Wallpaper/Images",
+    "KPlugin": {
+        "Authors": [{ "Name": "NovaOS Project" }],
+        "Id": "NovaOS",
+        "License": "CC-BY-SA-4.0",
+        "Name": "NovaOS"
+    }
+}
