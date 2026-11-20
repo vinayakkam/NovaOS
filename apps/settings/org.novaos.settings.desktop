@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Settings
+GenericName=NovaOS Settings
+Comment=Personalise NovaOS, connect devices and manage your PC
+Exec=novaos-settings
+Icon=org.novaos.settings
+Categories=Settings;System;
+Keywords=settings;preferences;control panel;wifi;bluetooth;display;theme;wallpaper;
+StartupWMClass=qml
+StartupNotify=true
