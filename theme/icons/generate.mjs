@@ -211,6 +211,84 @@ const actions = {
 };
 for (const [n, body] of Object.entries(actions)) put(`symbolic/actions/${n}.svg`, symbolic(body));
 
+// ---------------------------------------------------------------- symbolic status (top bar tray)
+// Exact names Plasma's tray applets ask for. Each is also written as "<name>-symbolic",
+// because an exact match in an inherited theme would otherwise win over ours.
+const speaker = `<path d="M3.5 8.5h3l4-3.5v12l-4-3.5h-3z"/>`;
+const wave = (n) => [`<path d="M13.5 9a3 3 0 0 1 0 4"/>`, `<path d="M15.5 7a6 6 0 0 1 0 8"/>`, `<path d="M17.5 5a9 9 0 0 1 0 12"/>`].slice(0, n).join("");
+const wifi = (n) => {
+  const arcs = [`<path d="M3 8.5a11.5 11.5 0 0 1 16 0"/>`, `<path d="M5.5 11a8 8 0 0 1 11 0"/>`, `<path d="M8 13.5a4.5 4.5 0 0 1 6 0"/>`];
+  return arcs.map((a, i) => (3 - i) <= n ? a : a.replace("<path", `<path opacity=".3"`)).join("") + `<circle cx="11" cy="16.5" r="1.2" fill="currentColor" stroke="none"/>`;
+};
+const battery = (level, charging) =>
+  `<rect x="3" y="7" width="14" height="8" rx="2"/><path d="M19 9.5v3"/>` +
+  (level > 0 ? `<rect x="5" y="9" width="${Math.max(1, 10 * level)}" height="4" rx=".8" fill="currentColor" stroke="none"${level < 0.15 ? ' opacity=".9"' : ""}/>` : "") +
+  (charging ? `<path d="M10.5 8l-2 3.2h3l-2 3.3" stroke-width="1.5"/>` : "");
+const status = {
+  "audio-volume-high": speaker + wave(3),
+  "audio-volume-medium": speaker + wave(2),
+  "audio-volume-low": speaker + wave(1),
+  "audio-volume-muted": speaker + `<path d="M14 9l4 4M18 9l-4 4"/>`,
+  "audio-volume-high-warning": speaker + wave(3),
+  "microphone-sensitivity-high": `<rect x="8" y="3" width="6" height="10" rx="3"/><path d="M5.5 10.5a5.5 5.5 0 0 0 11 0M11 16v3"/>`,
+  "microphone-sensitivity-muted": `<rect x="8" y="3" width="6" height="10" rx="3"/><path d="M5.5 10.5a5.5 5.5 0 0 0 11 0M11 16v3M4 4l14 14"/>`,
+  "network-wireless-signal-excellent": wifi(3), "network-wireless-connected-100": wifi(3), "network-wireless-100": wifi(3),
+  "network-wireless-signal-good": wifi(3), "network-wireless-connected-75": wifi(3), "network-wireless-80": wifi(3),
+  "network-wireless-signal-ok": wifi(2), "network-wireless-connected-50": wifi(2), "network-wireless-60": wifi(2),
+  "network-wireless-signal-low": wifi(1), "network-wireless-connected-25": wifi(1), "network-wireless-40": wifi(1),
+  "network-wireless-signal-none": wifi(0), "network-wireless-connected-00": wifi(0), "network-wireless-20": wifi(0),
+  "network-wireless-disconnected": wifi(0) + `<path d="M15 15l4 4M19 15l-4 4"/>`,
+  "network-wireless-acquiring": wifi(1),
+  "network-wired-activated": `<rect x="4" y="4" width="14" height="10" rx="2"/><path d="M8 18h6M11 14v4"/>`,
+  "network-wired": `<rect x="4" y="4" width="14" height="10" rx="2"/><path d="M8 18h6M11 14v4"/>`,
+  "network-wired-activated-limited": `<rect x="4" y="4" width="14" height="10" rx="2"/><path d="M8 18h6M11 14v4M11 7v3"/><circle cx="11" cy="12" r=".6" fill="currentColor"/>`,
+  "network-wired-disconnected": `<rect x="4" y="4" width="14" height="10" rx="2" opacity=".45"/><path d="M8 18h6M11 14v4" opacity=".45"/><path d="M15 15l4 4M19 15l-4 4"/>`,
+  "network-offline": `<circle cx="11" cy="11" r="7.5"/><path d="M3.5 11h15M11 3.5c2.5 2.5 2.5 12.5 0 15M11 3.5c-2.5 2.5-2.5 12.5 0 15"/><path d="M16 16l3.5 3.5" />`,
+  "network-limited": `<circle cx="11" cy="11" r="7.5"/><path d="M3.5 11h15M11 3.5c2.5 2.5 2.5 12.5 0 15M11 3.5c-2.5 2.5-2.5 12.5 0 15"/>`,
+  "network-flightmode-on": `<path d="M11 3c1 0 1.5 1 1.5 2v4l6 3.5v1.8l-6-1.8v3.5l2 1.5V19L11 18l-3.5 1v-1.5l2-1.5v-3.5l-6 1.8v-1.8l6-3.5V5c0-1 .5-2 1.5-2z"/>`,
+  "airplane-mode": `<path d="M11 3c1 0 1.5 1 1.5 2v4l6 3.5v1.8l-6-1.8v3.5l2 1.5V19L11 18l-3.5 1v-1.5l2-1.5v-3.5l-6 1.8v-1.8l6-3.5V5c0-1 .5-2 1.5-2z"/>`,
+  "bluetooth-active": `<path d="M6.5 7.5l9 7.5-4.5 4V3l4.5 4-9 7.5"/>`,
+  "bluetooth-online": `<path d="M6.5 7.5l9 7.5-4.5 4V3l4.5 4-9 7.5"/>`,
+  "preferences-system-bluetooth-activated": `<path d="M6.5 7.5l9 7.5-4.5 4V3l4.5 4-9 7.5"/>`,
+  "bluetooth-disabled": `<path d="M6.5 7.5l9 7.5-4.5 4V3l4.5 4-9 7.5" opacity=".45"/><path d="M4 4l14 14"/>`,
+  "bluetooth-inactive": `<path d="M6.5 7.5l9 7.5-4.5 4V3l4.5 4-9 7.5" opacity=".45"/>`,
+  "battery-100": battery(1), "battery-full": battery(1), "battery-090": battery(0.9), "battery-080": battery(0.8),
+  "battery-070": battery(0.7), "battery-good": battery(0.7), "battery-060": battery(0.6), "battery-050": battery(0.5),
+  "battery-040": battery(0.4), "battery-030": battery(0.3), "battery-low": battery(0.25), "battery-020": battery(0.2),
+  "battery-010": battery(0.1), "battery-caution": battery(0.1), "battery-000": battery(0), "battery-empty": battery(0),
+  "battery-100-charging": battery(1, true), "battery-full-charging": battery(1, true), "battery-080-charging": battery(0.8, true),
+  "battery-060-charging": battery(0.6, true), "battery-040-charging": battery(0.4, true), "battery-020-charging": battery(0.2, true),
+  "battery-000-charging": battery(0, true), "battery-missing": battery(0) + `<path d="M8 9l4 4M12 9l-4 4"/>`,
+  "ac-adapter": `<path d="M8 3v4M14 3v4M6 7h10v3a5 5 0 0 1-10 0zM11 15v4"/>`,
+  "brightness-high": `<circle cx="11" cy="11" r="3.5"/><path d="M11 2.5v2M11 17.5v2M2.5 11h2M17.5 11h2M5 5l1.4 1.4M15.6 15.6L17 17M5 17l1.4-1.4M15.6 6.4L17 5"/>`,
+  "brightness-medium": `<circle cx="11" cy="11" r="3.5"/><path d="M11 4v1.5M11 16.5V18M4 11h1.5M16.5 11H18M6 6l1 1M15 15l1 1M6 16l1-1M15 7l1-1"/>`,
+  "brightness-low": `<circle cx="11" cy="11" r="3.5"/><path d="M11 5.5v.5M11 16v.5M5.5 11h.5M16 11h.5"/>`,
+  "display-brightness": `<circle cx="11" cy="11" r="3.5"/><path d="M11 2.5v2M11 17.5v2M2.5 11h2M17.5 11h2M5 5l1.4 1.4M15.6 15.6L17 17M5 17l1.4-1.4M15.6 6.4L17 5"/>`,
+  "redshift-status-on": `<path d="M16.5 13.5A6.5 6.5 0 0 1 8.5 5.5a6.5 6.5 0 1 0 8 8z"/>`,
+  "redshift-status-off": `<path d="M16.5 13.5A6.5 6.5 0 0 1 8.5 5.5a6.5 6.5 0 1 0 8 8z" opacity=".45"/>`,
+  "notifications": `<path d="M6 15V10a5 5 0 0 1 10 0v5l1.5 2h-13z"/><path d="M9.5 19.5a1.8 1.8 0 0 0 3 0"/>`,
+  "notification-inactive": `<path d="M6 15V10a5 5 0 0 1 10 0v5l1.5 2h-13z"/><path d="M9.5 19.5a1.8 1.8 0 0 0 3 0"/>`,
+  "notification-active": `<path d="M6 15V10a5 5 0 0 1 10 0v5l1.5 2h-13z"/><path d="M9.5 19.5a1.8 1.8 0 0 0 3 0"/><circle cx="16.5" cy="5.5" r="2.5" fill="currentColor" stroke="none"/>`,
+  "notifications-disabled": `<path d="M6 15V10a5 5 0 0 1 10 0v5l1.5 2h-13z" opacity=".45"/><path d="M4 4l14 14"/>`,
+  "klipper": `<rect x="5" y="4.5" width="12" height="15" rx="2"/><rect x="8" y="3" width="6" height="3" rx="1"/><path d="M8 11h6M8 14.5h4"/>`,
+  "edit-paste": `<rect x="5" y="4.5" width="12" height="15" rx="2"/><rect x="8" y="3" width="6" height="3" rx="1"/><path d="M8 11h6M8 14.5h4"/>`,
+  "device-notifier": `<rect x="6" y="9" width="10" height="10" rx="2"/><path d="M8 9V4h6v5M9 6h1M12 6h1"/>`,
+  "drive-removable-media": `<rect x="6" y="9" width="10" height="10" rx="2"/><path d="M8 9V4h6v5M9 6h1M12 6h1"/>`,
+  "preferences-desktop-display-randr": `<rect x="3" y="4" width="16" height="11" rx="2"/><path d="M8 19h6M11 15v4"/>`,
+  "video-display": `<rect x="3" y="4" width="16" height="11" rx="2"/><path d="M8 19h6M11 15v4"/>`,
+  "input-keyboard": `<rect x="2.5" y="6" width="17" height="10" rx="2"/><path d="M6 9.5h.5M9 9.5h.5M12 9.5h.5M15 9.5h.5M7 13h8"/>`,
+  "media-playback-playing": `<path d="M7.5 5v12l10-6z"/>`,
+  "media-playback-paused": `<path d="M7 5v12M15 5v12"/>`,
+  "arrow-down": `<path d="M6 9l5 5 5-5"/>`, "go-down": `<path d="M6 9l5 5 5-5"/>`, "pan-down": `<path d="M6 9l5 5 5-5"/>`,
+  "arrow-up": `<path d="M6 13l5-5 5 5"/>`, "go-up": `<path d="M6 13l5-5 5 5"/>`, "pan-up": `<path d="M6 13l5-5 5 5"/>`,
+};
+for (const [n, body] of Object.entries(status)) {
+  put(`symbolic/status/${n}.svg`, symbolic(body));
+  put(`symbolic/status/${n}-symbolic.svg`, symbolic(body));
+}
+// the action icons used in the tray (lock / log out) also get -symbolic twins
+for (const [n, body] of Object.entries(actions)) put(`symbolic/actions/${n}-symbolic.svg`, symbolic(body));
+
 // ---------------------------------------------------------------- index.theme
 put("index.theme", `
 [Icon Theme]
@@ -220,7 +298,7 @@ Inherits=breeze-dark,breeze,hicolor
 Example=folder
 DisplayDepth=32
 FollowsColorScheme=true
-Directories=scalable/apps,scalable/places,symbolic/actions
+Directories=scalable/apps,scalable/places,symbolic/actions,symbolic/status
 
 [scalable/apps]
 Size=48
@@ -241,6 +319,13 @@ Size=22
 MinSize=16
 MaxSize=128
 Context=Actions
+Type=Scalable
+
+[symbolic/status]
+Size=22
+MinSize=16
+MaxSize=128
+Context=Status
 Type=Scalable
 `);
 

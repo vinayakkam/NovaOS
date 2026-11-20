@@ -183,7 +183,8 @@ rsvg-convert -w 400 -h 225 "$REPO/theme/wallpapers/NovaOS/novaos-wallpaper.svg" 
 
 install -Dm644 "$REPO/theme/branding/novaos-logo.svg" "$AIR/usr/share/icons/hicolor/scalable/apps/novaos-start.svg"
 install -Dm644 "$REPO/theme/branding/novaos-logo.svg" "$AIR/usr/share/pixmaps/novaos-logo.svg"
-rsvg-convert -w 256 -h 256 "$REPO/theme/branding/novaos-logo.svg" -o "$AIR/usr/share/pixmaps/novaos-avatar.png"
+# default account picture: generic person silhouette (theme/branding/default-avatar.svg)
+rsvg-convert -w 256 -h 256 "$REPO/theme/branding/default-avatar.svg" -o "$AIR/usr/share/pixmaps/novaos-avatar.png"
 
 log "Staging plasmoids and installer branding"
 mkdir -p "$AIR/usr/share/plasma/plasmoids" "$AIR/usr/share/calamares/branding"

@@ -77,14 +77,21 @@ dock, Start menu (search + 12 pinned apps; fixed and verified by hot-patch), Set
 app, OnlyOffice, terminal greeting, accent colour switching (helper writes
 AccentColor and re-applies the scheme).
 
+Done in the repo but **not yet in a built ISO** (next step: `build-iso.ps1`, then
+`test-vm.ps1`, then screenshot everything):
+- Start menu pins fix, floating top bar, baloosearch runner removed.
+- NovaOS tray/status icons (`symbolic/status` in generate.mjs, 273 icon files total).
+- Default account picture: `theme/branding/default-avatar.svg` (generic silhouette).
+
 Not yet verified or still open:
-- Rebuild ISO with: Start menu pins fix, floating top bar, baloosearch runner removed,
-  Task Manager page argument.
-- Task Manager Performance page: verify it opens and renders.
+- Task Manager: Processes page works; the `performance` launch argument did not
+  select the page (Qt.application.arguments after `--`?); Performance page itself
+  not seen yet.
 - Lock screen and new logout screen: screenshot-verify.
-- Tray icons in NovaOS style (status icons in the icon generator).
-- Default account picture: original generic person silhouette (Windows-style),
-  replacing the logo.
+- SDDM greeter shows SDDM's own default face when the user has none; prefer
+  `/usr/share/pixmaps/novaos-avatar.png` in that case.
+- Live floating of the top bar via `qdbus6 ... evaluateScript` failed (qdbus6 likely
+  not in the ISO); the layout default handles new users.
 - RAM: ~1.18-1.26 GB in the VM with software rendering. plasmashell ~570-630 MB and
   kwin ~320 MB dominate (llvmpipe). Next: measure with VirtualBox 3D on; find who
   D-Bus-activates kdeconnectd (57 MB, activated via dbus-broker, caller unknown).
