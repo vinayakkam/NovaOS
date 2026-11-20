@@ -1,0 +1,14 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [{ "Name": "NovaOS Project" }],
+        "Category": "Date and Time",
+        "Description": "NovaOS top bar centre: memory ring, date, time and CPU ring",
+        "Icon": "preferences-system-time",
+        "Id": "org.novaos.topclock",
+        "License": "GPL-2.0-or-later",
+        "Name": "NovaOS Clock & Meters",
+        "Version": "1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}
