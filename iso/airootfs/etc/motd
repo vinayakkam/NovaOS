@@ -1,0 +1,2 @@
+Welcome to NovaOS (live). The desktop starts automatically on tty1.
+Networking is handled by NetworkManager (nmcli / nmtui on the console).

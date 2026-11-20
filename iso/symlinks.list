@@ -1,0 +1,35 @@
+# Symlinks inside airootfs, recreated by scripts/build-iso.sh.
+# (Git on Windows/NTFS cannot store them reliably, so they live here as text.)
+# Format: <link path inside airootfs>  <link target>
+
+/etc/localtime                                                       /usr/share/zoneinfo/UTC
+/etc/systemd/system-generators/systemd-gpt-auto-generator            /dev/null
+
+# Desktop
+/etc/systemd/system/display-manager.service                          /usr/lib/systemd/system/sddm.service
+/etc/systemd/system/multi-user.target.wants/novaos-live-user.service ../novaos-live-user.service
+
+# Networking / Bluetooth
+/etc/systemd/system/multi-user.target.wants/NetworkManager.service   /usr/lib/systemd/system/NetworkManager.service
+/etc/systemd/system/dbus-org.freedesktop.nm-dispatcher.service       /usr/lib/systemd/system/NetworkManager-dispatcher.service
+/etc/systemd/system/network-online.target.wants/NetworkManager-wait-online.service /usr/lib/systemd/system/NetworkManager-wait-online.service
+/etc/systemd/system/multi-user.target.wants/ModemManager.service     /usr/lib/systemd/system/ModemManager.service
+/etc/systemd/system/dbus-org.freedesktop.ModemManager1.service       /usr/lib/systemd/system/ModemManager.service
+/etc/systemd/system/bluetooth.target.wants/bluetooth.service         /usr/lib/systemd/system/bluetooth.service
+/etc/systemd/system/dbus-org.bluez.service                           /usr/lib/systemd/system/bluetooth.service
+/etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service   /usr/lib/systemd/system/systemd-timesyncd.service
+/etc/systemd/system/dbus-org.freedesktop.timesync1.service           /usr/lib/systemd/system/systemd-timesyncd.service
+
+# Live-medium helpers from releng
+/etc/systemd/system/multi-user.target.wants/pacman-init.service      ../pacman-init.service
+/etc/systemd/system/multi-user.target.wants/choose-mirror.service    ../choose-mirror.service
+/etc/systemd/system/multi-user.target.wants/livecd-talk.service      /etc/systemd/system/livecd-talk.service
+/etc/systemd/system/sound.target.wants/livecd-alsa-unmuter.service   ../livecd-alsa-unmuter.service
+
+# VM guest services (each only starts on its own hypervisor)
+/etc/systemd/system/multi-user.target.wants/vboxservice.service      /usr/lib/systemd/system/vboxservice.service
+/etc/systemd/system/multi-user.target.wants/vmtoolsd.service         /usr/lib/systemd/system/vmtoolsd.service
+/etc/systemd/system/multi-user.target.wants/vmware-vmblock-fuse.service /usr/lib/systemd/system/vmware-vmblock-fuse.service
+/etc/systemd/system/multi-user.target.wants/hv_fcopy_daemon.service  /usr/lib/systemd/system/hv_fcopy_daemon.service
+/etc/systemd/system/multi-user.target.wants/hv_kvp_daemon.service    /usr/lib/systemd/system/hv_kvp_daemon.service
+/etc/systemd/system/multi-user.target.wants/hv_vss_daemon.service    /usr/lib/systemd/system/hv_vss_daemon.service

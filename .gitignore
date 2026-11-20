@@ -1,0 +1,7 @@
+/out/
+/work/
+target/
+node_modules/
+apps/welcome/src-tauri/icons/
+apps/welcome/src-tauri/gen/
+*.iso

@@ -1,0 +1,118 @@
+# NovaOS live ISO package list (one package per line, '#' comments allowed).
+# Optional NVIDIA drivers live in packages.nvidia (build with NVIDIA=1).
+# Calamares is not in the official repos - see calamares/README.md.
+
+# --- Base system & boot ---
+base
+linux
+linux-firmware
+linux-firmware-marvell
+amd-ucode
+intel-ucode
+mkinitcpio
+mkinitcpio-archiso
+syslinux
+grub
+efibootmgr
+edk2-shell
+memtest86+
+memtest86+-efi
+sof-firmware
+sudo
+
+# --- Filesystems & disk tools ---
+arch-install-scripts
+btrfs-progs
+snapper
+dosfstools
+e2fsprogs
+exfatprogs
+ntfs-3g
+xfsprogs
+cryptsetup
+lvm2
+mdadm
+parted
+gptfdisk
+squashfs-tools
+mtools
+smartmontools
+nvme-cli
+
+# --- Networking ---
+networkmanager
+modemmanager
+usb_modeswitch
+wpa_supplicant
+wireless-regdb
+iw
+bluez
+bluez-utils
+openssh
+reflector
+rsync
+wget
+curl
+
+# --- Audio (PipeWire) ---
+pipewire
+pipewire-alsa
+pipewire-pulse
+pipewire-jack
+wireplumber
+alsa-utils
+livecd-sounds
+
+# --- Accessibility (used by the speech boot entries) ---
+brltty
+espeakup
+
+# --- KDE Plasma 6 desktop ---
+plasma-meta
+sddm
+kwin
+krunner
+dolphin
+konsole
+kdeconnect
+kate
+ark
+spectacle
+gwenview
+okular
+partitionmanager
+plasma-systemmonitor
+xdg-desktop-portal-kde
+xdg-user-dirs
+xdg-utils
+kvantum
+
+# --- Fonts ---
+inter-font
+noto-fonts
+noto-fonts-emoji
+
+# --- Apps ---
+firefox
+wine
+wine-mono
+wine-gecko
+
+# --- CLI basics ---
+git
+nano
+vim
+less
+man-db
+man-pages
+bash-completion
+htop
+usbutils
+pciutils
+
+# --- VM guest support ---
+virtualbox-guest-utils
+open-vm-tools
+hyperv
+qemu-guest-agent
+spice-vdagent

@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = ["quicklook", "winlayer"]
+# apps/welcome is a separate Tauri project (its own Cargo workspace under src-tauri).
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-or-later"

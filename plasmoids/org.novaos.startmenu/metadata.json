@@ -1,0 +1,14 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [{ "Name": "NovaOS Project" }],
+        "Category": "Application Launchers",
+        "Description": "Centered Start menu with search, pinned apps and recommendations (work in progress)",
+        "Icon": "novaos-start",
+        "Id": "org.novaos.startmenu",
+        "License": "GPL-2.0-or-later",
+        "Name": "NovaOS Start",
+        "Version": "0.1"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

@@ -1,0 +1,2 @@
+# Live session only: the passwordless live user gets sudo without a password.
+%wheel ALL=(ALL:ALL) NOPASSWD: ALL

@@ -1,0 +1,12 @@
+[package]
+name = "novaos-winlayer"
+description = "Open Windows .exe/.msi files with Wine (stub)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "novaos-winlayer"
+path = "src/main.rs"
+
+[dependencies]

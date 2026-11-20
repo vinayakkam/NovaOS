@@ -1,0 +1,7 @@
+# Appended to packages.x86_64 when building with NVIDIA=1.
+# nvidia-open supports Turing (GTX 16xx / RTX 20xx) and newer, e.g. the GTX 1650.
+# Leave off for VM testing: VirtualBox has no NVIDIA GPU to drive.
+nvidia-open
+nvidia-utils
+lib32-nvidia-utils
+nvidia-settings

@@ -1,0 +1,49 @@
+name: build-iso
+
+on:
+  workflow_dispatch:
+    inputs:
+      nvidia:
+        description: "Include NVIDIA open drivers"
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - "iso/**"
+      - "theme/**"
+      - "plasmoids/**"
+      - "calamares/**"
+      - "scripts/build-iso.sh"
+      - ".github/workflows/build-iso.yml"
+
+jobs:
+  iso:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    container:
+      image: archlinux:latest
+      # mkarchiso/pacstrap need mount + chroot
+      options: --privileged
+    steps:
+      - name: Install build dependencies
+        run: |
+          pacman -Syu --noconfirm --needed archiso git rsync librsvg
+
+      - uses: actions/checkout@v4
+
+      - name: Build ISO
+        env:
+          OUT_DIR: ${{ github.workspace }}/out
+          WORK_ROOT: /var/tmp/novaos-build
+          NVIDIA: ${{ inputs.nvidia && '1' || '0' }}
+        run: bash scripts/build-iso.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: novaos-iso
+          path: |
+            out/*.iso
+            out/*.sha256
+          compression-level: 0
+          retention-days: 7
