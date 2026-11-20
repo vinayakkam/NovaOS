@@ -13,7 +13,9 @@ param(
     [int]   $MemoryMB = 6144,
     [int]   $VramMB   = 128,
     [int]   $DiskGB   = 40,
-    [string]$VBoxManage = 'D:\Tools\VirtualBox\VBoxManage.exe',
+    # VirtualBox 7.1+ refuses install dirs that normal users can write to (e.g. D:\Tools),
+    # so the program lives in Program Files; VMs, disks and settings stay on D:.
+    [string]$VBoxManage = 'C:\Program Files\Oracle\VirtualBox\VBoxManage.exe',
     [string]$BaseFolder = 'D:\VirtualBox\VMs',
     [switch]$NoStart
 )
