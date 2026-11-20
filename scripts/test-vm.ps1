@@ -31,7 +31,10 @@ if (-not $Iso) {
 if (-not $Iso -or -not (Test-Path $Iso)) { throw "No ISO found in $repo\out - run scripts\build-iso.ps1 first" }
 
 function Invoke-VBox {
-    & $VBoxManage @args
+    # VBoxManage prints progress bars on stderr; Windows PowerShell 5.1 turns that into
+    # terminating errors under 'Stop', so judge success by the exit code only.
+    $ErrorActionPreference = 'Continue'
+    & $VBoxManage @args 2>&1 | ForEach-Object { "$_" }
     if ($LASTEXITCODE) { throw "VBoxManage $($args -join ' ') failed (exit $LASTEXITCODE)" }
 }
 
@@ -48,6 +51,11 @@ if ($existing) {
         Start-Sleep -Seconds 3
     }
     Invoke-VBox unregistervm $VmName --delete
+}
+# A disk left behind by an interrupted run is not attached to the VM, so --delete misses it
+if (Test-Path $disk) {
+    Write-Host "Removing leftover disk $disk"
+    Invoke-VBox closemedium disk $disk --delete
 }
 
 Write-Host "Creating $VmName with $Iso"
