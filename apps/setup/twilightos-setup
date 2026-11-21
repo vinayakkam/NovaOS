@@ -1,0 +1,5 @@
+#!/bin/sh
+# Launch TwilightOS Setup (live session only). The run dir is where the window
+# hands the new account's password to the root backend, in a private file.
+export QT_QUICK_CONTROLS_STYLE="${QT_QUICK_CONTROLS_STYLE:-org.kde.desktop}"
+exec /usr/lib/qt6/bin/qml /usr/share/twilightos/setup/Main.qml -- "--rundir=${XDG_RUNTIME_DIR:-/tmp}"

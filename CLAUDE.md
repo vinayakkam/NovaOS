@@ -71,31 +71,50 @@ macOS conveniences. Renamed from "NovaOS" on 2026-11-21 (that name was taken).
   `quicklook`/`winlayer`, Tauri stub `welcome`.
 - `packages/onlyoffice-bin` repackaged official v10.0.0 .deb (sha256 pinned).
 
-## Status (2026-11-20)
-Working in the VM: desktop, slim top bar (active app / date-time / CPU-RAM bars),
-dock, Start menu (search + 12 pinned apps; fixed and verified by hot-patch), Settings
-app, OnlyOffice, terminal greeting, accent colour switching (helper writes
-AccentColor and re-applies the scheme).
+- `apps/setup` **TwilightOS Setup**, the installer: `Main.qml` (Windows-Setup-style
+  steps: language/time zone/keyboard, disk, account, summary, progress, done) and
+  `twilightos-install` (root backend via the live user's sudo). It wipes the chosen
+  disk: GPT, 1 GB ESP (UEFI) or BIOS-boot partition, btrfs root with `@ @home
+  @snapshots @var_log @pkg` (zstd), unsquashfs of the ISO's airootfs.sfs, strips the
+  live bits (live user service, NOPASSWD sudoers, SDDM autologin, memreport,
+  archiso mkinitcpio conf), user + wheel sudo, locale/time/keymap, mkinitcpio,
+  GRUB (EFI + removable fallback, or i386-pc) with the TwilightOS theme, Snapper.
+  Progress: `/run/twilightos-install/progress` ("percent|message"), log next to it.
+- GRUB theme: `theme/grub/theme.txt` + `scripts/make-grub-theme.sh` (background from
+  Denali, 9-slice menu pixmaps, Inter pf2 fonts). Used by the ISO (UEFI bootmode
+  `uefi.grub`, `iso/grub/grub.cfg`) and copied to `/usr/share/grub/themes/twilightos`
+  for installed systems. BIOS ISO boot is still syslinux.
+- Light mode: `theme/colors/TwilightLight.colors`; every widget/app uses
+  Kirigami.Theme colours, so they follow light/dark.
 
-Done in the repo but **not yet in a built ISO** (next step: `build-iso.ps1`, then
-`test-vm.ps1`, then screenshot everything):
-- Start menu pins fix, floating top bar, baloosearch runner removed.
-- TwilightOS tray/status icons (`symbolic/status` in generate.mjs, 273 icon files total).
-- Default account picture: `theme/branding/default-avatar.svg` (generic silhouette).
+## Status (2026-11-21)
+Name is **TwilightOS** (was NovaOS; GitHub repo renamed, local folder still `novaos`).
 
-Not yet verified or still open:
-- Task Manager: Processes page works; the `performance` launch argument did not
-  select the page (Qt.application.arguments after `--`?); Performance page itself
-  not seen yet.
-- Lock screen and new logout screen: screenshot-verify.
-- SDDM greeter shows SDDM's own default face when the user has none; prefer
-  `/usr/share/pixmaps/twilightos-avatar.png` in that case.
-- Live floating of the top bar via `qdbus6 ... evaluateScript` failed (qdbus6 likely
-  not in the ISO); the layout default handles new users.
-- RAM: ~1.18-1.26 GB in the VM with software rendering. plasmashell ~570-630 MB and
-  kwin ~320 MB dominate (llvmpipe). Next: measure with VirtualBox 3D on; find who
-  D-Bus-activates kdeconnectd (57 MB, activated via dbus-broker, caller unknown).
+Verified in the VM (v9, 3D on): desktop, Dusk launcher, Settings (accent tinting),
+Task Manager (incl. Performance page argument), terminal greeting, logout, lock and
+sign-in screens, notifications bell, Quick Settings data. RAM: 1,316 MB used with
+Settings + Task Manager + Konsole open (~820 MB idle desktop); plasmashell 382 MB,
+kwin 255 MB.
+
+Built but not yet verified (v10): Setup installer + a real install to the VM disk,
+GRUB themed menu (ISO and installed), light mode, launcher tabs trimmed to
+Favourites/All/Internet/Office/Media/System, dock now always visible (dodge-windows
+was unreliable; still selectable in Settings > Taskbar).
+
+Next session (resume here):
+- **Bug:** the v10 ISO GRUB menu fails with "theme.txt / inter-*.pf2 not found" under
+  /boot/grub/themes/twilightos: archiso does not copy the `grub/themes/` subfolder
+  from the profile onto the ISO. Fix: copy it into `$work/iso/boot/grub/themes`
+  (e.g. via a build step after mkarchiso stages the ISO tree, or put the theme in a
+  path archiso copies), rebuild, then run `scripts	est-install.ps1` (GRUB, light
+  mode, Setup window, real install to the VM disk, boot from disk).
+- Build note: mkarchiso cannot overwrite an ISO on D: that VirtualBox still has
+  attached (same-day filename); build to WSL `/var/tmp` or remove the old ISO first.
+
+Open:
+- Quick Settings popup visuals and meters busiest-process list (ydotool clicks
+  missed at 1280x800).
+- Meta+A / Meta+N shortcuts: widget.globalShortcut throws in layout scripts.
 - Owner said "rewrite cmd": unclear; ask what they mean.
-- Calamares installer not added yet (see `calamares/README.md`).
 - Old Rust install on C: (`C:\Users\User\.cargo`, `.rustup`, ~3.3 GB): owner hasn't
   decided whether to delete it.

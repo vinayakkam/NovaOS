@@ -32,14 +32,14 @@ QQC2.ApplicationWindow {
     color: base
 
     // ---------------- Twilight tokens ----------------
-    readonly property color base: "#0d1428"
-    readonly property color side: "#0a1022"
-    readonly property color card: Qt.rgba(1, 1, 1, 0.045)
-    readonly property color cardHover: Qt.rgba(1, 1, 1, 0.075)
-    readonly property color border: Qt.rgba(1, 1, 1, 0.07)
-    readonly property color textColor: "#f1eee6"
-    readonly property color subtext: "#aeb3c8"
-    readonly property color dim: "#727892"
+    readonly property color base: Kirigami.Theme.backgroundColor
+    readonly property color side: Qt.darker(Kirigami.Theme.backgroundColor, 1.06)
+    readonly property color card: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.045)
+    readonly property color cardHover: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.075)
+    readonly property color border: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.07)
+    readonly property color textColor: Kirigami.Theme.textColor
+    readonly property color subtext: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.66)
+    readonly property color dim: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.45)
     // Follows the system accent colour, so changes show up immediately
     readonly property color accent: Kirigami.Theme.highlightColor
     readonly property color accent2: Qt.lighter(accent, 1.3)
@@ -254,7 +254,7 @@ QQC2.ApplicationWindow {
         implicitWidth: bl.implicitWidth + 28
         implicitHeight: 32
         radius: 6
-        color: b.primary ? (ba.containsMouse ? Qt.lighter(app.accent, 1.08) : app.accent) : (ba.containsMouse ? app.cardHover : Qt.rgba(1, 1, 1, 0.07))
+        color: b.primary ? (ba.containsMouse ? Qt.lighter(app.accent, 1.08) : app.accent) : (ba.containsMouse ? app.cardHover : Qt.rgba(app.textColor.r, app.textColor.g, app.textColor.b, 0.07))
         border.color: b.primary ? "transparent" : app.border
         Label { id: bl; anchors.centerIn: parent; text: b.text; font.pixelSize: 13; color: b.primary ? "#ffffff" : app.textColor }
         MouseArea { id: ba; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: b.clicked() }
@@ -268,7 +268,7 @@ QQC2.ApplicationWindow {
         implicitWidth: chl.implicitWidth + 24
         implicitHeight: 32
         radius: 16
-        color: ch.selected ? Qt.rgba(app.accent.r, app.accent.g, app.accent.b, 0.22) : (cha.containsMouse ? app.cardHover : Qt.rgba(1, 1, 1, 0.06))
+        color: ch.selected ? Qt.rgba(app.accent.r, app.accent.g, app.accent.b, 0.22) : (cha.containsMouse ? app.cardHover : Qt.rgba(app.textColor.r, app.textColor.g, app.textColor.b, 0.06))
         border.color: ch.selected ? app.accent : app.border
         Label { id: chl; anchors.centerIn: parent; text: ch.text; font.pixelSize: 13 }
         MouseArea { id: cha; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ch.clicked() }
@@ -329,7 +329,7 @@ QQC2.ApplicationWindow {
                     Layout.preferredHeight: 36
                     Layout.bottomMargin: 8
                     radius: 6
-                    color: Qt.rgba(1, 1, 1, 0.06)
+                    color: Qt.rgba(app.textColor.r, app.textColor.g, app.textColor.b, 0.06)
                     border.color: findField.activeFocus ? app.accent : app.border
                     Kirigami.Icon { id: findIcon; source: "edit-find"; isMask: true; color: app.subtext; width: 16; height: 16; anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter }
                     TextInput {
@@ -370,7 +370,7 @@ QQC2.ApplicationWindow {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 38
                         radius: 6
-                        color: current ? Qt.rgba(1, 1, 1, 0.07) : (navArea.containsMouse ? Qt.rgba(1, 1, 1, 0.04) : "transparent")
+                        color: current ? Qt.rgba(app.textColor.r, app.textColor.g, app.textColor.b, 0.07) : (navArea.containsMouse ? Qt.rgba(app.textColor.r, app.textColor.g, app.textColor.b, 0.04) : "transparent")
                         Rectangle {
                             visible: parent.current
                             width: 3; height: 16; radius: 1.5
@@ -537,7 +537,7 @@ QQC2.ApplicationWindow {
                             Layout.preferredWidth: 200
                             Layout.preferredHeight: 8
                             radius: 4
-                            color: Qt.rgba(1, 1, 1, 0.1)
+                            color: Qt.rgba(app.textColor.r, app.textColor.g, app.textColor.b, 0.1)
                             Rectangle {
                                 height: parent.height
                                 radius: 4
@@ -674,7 +674,7 @@ QQC2.ApplicationWindow {
                         Layout.fillWidth: true
                         spacing: 12
                         Repeater {
-                            model: [["Twilight", "Dark", "#0d1428", "#1d2a4d"], ["BreezeLight", "Light", "#f3f4f8", "#ffffff"]]
+                            model: [["Twilight", "Dark", "#0d1428", "#1d2a4d"], ["TwilightLight", "Light", "#f6f4f0", "#ffffff"]]
                             delegate: Rectangle {
                                 required property var modelData
                                 readonly property bool current: (app.theme.scheme || "Twilight") === modelData[0]
@@ -752,7 +752,7 @@ QQC2.ApplicationWindow {
                         title: "Dock behaviour"
                         subtitle: "How the dock reacts to windows"
                         Repeater {
-                            model: [["dodge", "dodgewindows", "Move out of the way"], ["autohide", "autohide", "Auto-hide"], ["always", "none", "Always show"]]
+                            model: [["always", "none", "Always show"], ["autohide", "autohide", "Auto-hide"], ["dodge", "dodgewindows", "Move out of the way (experimental)"]]
                             delegate: Choice {
                                 required property var modelData
                                 text: modelData[2]

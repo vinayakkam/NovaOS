@@ -15,8 +15,8 @@ import org.kde.kirigami as Kirigami
 PlasmoidItem {
     id: root
 
-    readonly property color textColor: "#f1eee6"
-    readonly property color subtext: "#8f95ad"
+    readonly property color textColor: Kirigami.Theme.textColor
+    readonly property color subtext: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.66)
 
     preferredRepresentation: compactRepresentation
     Plasmoid.backgroundHints: "NoBackground"
@@ -44,7 +44,7 @@ PlasmoidItem {
             anchors.topMargin: 3
             anchors.bottomMargin: 3
             radius: 6
-            color: area.containsMouse || root.expanded ? Qt.rgba(1, 1, 1, 0.07) : "transparent"
+            color: area.containsMouse || root.expanded ? Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.07) : "transparent"
             Behavior on color { ColorAnimation { duration: 120 } }
         }
 

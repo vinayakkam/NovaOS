@@ -27,12 +27,12 @@ PlasmoidItem {
     // Follows the system accent colour (Settings > Personalisation)
     readonly property color accent: Kirigami.Theme.highlightColor
     readonly property color accent2: Qt.lighter(accent, 1.3)
-    readonly property color textColor: "#f1eee6"
-    readonly property color subtext: "#aeb3c8"
-    readonly property color dim: "#727892"
-    readonly property color card: Qt.rgba(1, 1, 1, 0.055)
-    readonly property color hover: Qt.rgba(1, 1, 1, 0.09)
-    readonly property color border: Qt.rgba(1, 1, 1, 0.09)
+    readonly property color textColor: Kirigami.Theme.textColor
+    readonly property color subtext: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.66)
+    readonly property color dim: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.45)
+    readonly property color card: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.055)
+    readonly property color hover: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.09)
+    readonly property color border: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.09)
 
     preferredRepresentation: compactRepresentation
     activationTogglesExpanded: true
@@ -247,7 +247,7 @@ PlasmoidItem {
                     GradientStop { position: 0.55; color: Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.08) }
                     GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.18) }
                 }
-                border.color: Qt.rgba(1, 1, 1, 0.06)
+                border.color: Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.06)
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -279,7 +279,7 @@ PlasmoidItem {
                         radius: 21
                         color: Qt.rgba(0, 0, 0, 0.25)
                         border.width: search.activeFocus ? 2 : 1
-                        border.color: search.activeFocus ? root.accent : Qt.rgba(1, 1, 1, 0.12)
+                        border.color: search.activeFocus ? root.accent : Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.12)
                         Kirigami.Icon {
                             id: searchIcon
                             anchors.left: parent.left
@@ -365,7 +365,7 @@ PlasmoidItem {
                     }
 
                     // you + session
-                    Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: Qt.rgba(1, 1, 1, 0.1) }
+                    Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.1) }
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 6
@@ -412,9 +412,11 @@ PlasmoidItem {
                     // -1 Favourites, 0 All, 1.. categories (names from the model)
                     model: {
                         const out = [{ row: -1, name: i18n("Favourites") }, { row: 0, name: i18n("All") }];
+                        // Only a few broad shelves (everything else is under All / search).
+                        const keep = { "Internet": i18n("Internet"), "Office": i18n("Office"), "Multimedia": i18n("Media"), "System": i18n("System") };
                         for (let r = 1; r < rootModel.count; r++) {
                             const name = String(rootModel.labelForRow(r) || "").trim();
-                            if (name !== "") out.push({ row: r, name: name });   // skip separators / unnamed rows
+                            if (keep[name] !== undefined) out.push({ row: r, name: keep[name] });
                         }
                         return out;
                     }
@@ -424,7 +426,7 @@ PlasmoidItem {
                         height: 34
                         width: tabText.implicitWidth + 28
                         radius: 17
-                        color: current ? root.accent : (tabArea.containsMouse ? root.hover : Qt.rgba(1, 1, 1, 0.05))
+                        color: current ? root.accent : (tabArea.containsMouse ? root.hover : Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.05))
                         border.color: current ? "transparent" : root.border
                         Behavior on color { ColorAnimation { duration: 140 } }
                         Text {
@@ -519,7 +521,7 @@ PlasmoidItem {
                                     Layout.preferredWidth: 36
                                     Layout.preferredHeight: 36
                                     radius: 10
-                                    color: Qt.rgba(1, 1, 1, 0.06)
+                                    color: Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.06)
                                     Kirigami.Icon { anchors.centerIn: parent; source: model.decoration; width: 26; height: 26 }
                                 }
                                 ColumnLayout {
@@ -533,7 +535,7 @@ PlasmoidItem {
                                     Layout.preferredWidth: enterText.implicitWidth + 14
                                     Layout.preferredHeight: 22
                                     radius: 6
-                                    color: Qt.rgba(1, 1, 1, 0.08)
+                                    color: Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.08)
                                     Text { id: enterText; anchors.centerIn: parent; text: i18n("Enter"); color: root.subtext; font.family: "Inter"; font.pixelSize: 10 }
                                 }
                             }
@@ -563,8 +565,8 @@ PlasmoidItem {
             width: 190
             height: powerCol.implicitHeight + 12
             radius: 12
-            color: "#141d38"
-            border.color: Qt.rgba(1, 1, 1, 0.12)
+            color: Kirigami.Theme.backgroundColor
+            border.color: Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.12)
             ColumnLayout {
                 id: powerCol
                 anchors.fill: parent
@@ -602,7 +604,7 @@ PlasmoidItem {
         signal activated()
         signal context()
         radius: 12
-        color: hcArea.pressed ? Qt.rgba(1, 1, 1, 0.14) : (hcArea.containsMouse || active ? root.hover : "transparent")
+        color: hcArea.pressed ? Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.14) : (hcArea.containsMouse || active ? root.hover : "transparent")
         Behavior on color { ColorAnimation { duration: 120 } }
         MouseArea {
             id: hcArea
@@ -628,9 +630,9 @@ PlasmoidItem {
             radius: 34
             anchors.horizontalCenter: parent.horizontalCenter
             y: 6
-            color: bb.hot ? Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.22) : Qt.rgba(1, 1, 1, 0.045)
+            color: bb.hot ? Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.22) : Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.045)
             border.width: bb.hot ? 2 : 1
-            border.color: bb.hot ? root.accent : Qt.rgba(1, 1, 1, 0.07)
+            border.color: bb.hot ? root.accent : Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.07)
             scale: bbArea.pressed ? 0.93 : (bb.hot ? 1.06 : 1)
             Behavior on color { ColorAnimation { duration: 140 } }
             Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }

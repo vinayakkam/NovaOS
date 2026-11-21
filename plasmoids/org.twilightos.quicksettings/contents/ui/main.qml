@@ -20,8 +20,8 @@ PlasmoidItem {
     id: root
 
     readonly property color accent: Kirigami.Theme.highlightColor
-    readonly property color textColor: "#f1eee6"
-    readonly property color subtext: "#aeb3c8"
+    readonly property color textColor: Kirigami.Theme.textColor
+    readonly property color subtext: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.66)
     readonly property string helper: "/usr/local/bin/twilightos-settings-helper"
 
     preferredRepresentation: compactRepresentation
@@ -105,7 +105,7 @@ PlasmoidItem {
             anchors.topMargin: 3
             anchors.bottomMargin: 3
             radius: 6
-            color: compact.containsMouse || root.expanded ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+            color: compact.containsMouse || root.expanded ? Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.08) : "transparent"
             Behavior on color { ColorAnimation { duration: 120 } }
         }
         RowLayout {
@@ -130,8 +130,8 @@ PlasmoidItem {
         Layout.fillWidth: true
         Layout.preferredHeight: 62
         radius: 14
-        color: tile.on ? root.accent : (tileArea.containsMouse ? Qt.rgba(1, 1, 1, 0.11) : Qt.rgba(1, 1, 1, 0.065))
-        border.color: tile.on ? "transparent" : Qt.rgba(1, 1, 1, 0.08)
+        color: tile.on ? root.accent : (tileArea.containsMouse ? Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.11) : Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.065))
+        border.color: tile.on ? "transparent" : Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.08)
         Behavior on color { ColorAnimation { duration: 160 } }
 
         MouseArea {
@@ -158,14 +158,14 @@ PlasmoidItem {
                 spacing: 0
                 Layout.fillWidth: true
                 Text { text: tile.label; color: tile.on ? "#ffffff" : root.textColor; font.family: "Inter"; font.pixelSize: 13; font.weight: Font.DemiBold; elide: Text.ElideRight; Layout.fillWidth: true }
-                Text { text: tile.sub; visible: text !== ""; color: tile.on ? Qt.rgba(1, 1, 1, 0.85) : root.subtext; font.family: "Inter"; font.pixelSize: 11; elide: Text.ElideRight; Layout.fillWidth: true }
+                Text { text: tile.sub; visible: text !== ""; color: tile.on ? Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.85) : root.subtext; font.family: "Inter"; font.pixelSize: 11; elide: Text.ElideRight; Layout.fillWidth: true }
             }
             Rectangle {
                 visible: tile.moreCmd !== ""
                 Layout.preferredWidth: 22
                 Layout.preferredHeight: 22
                 radius: 11
-                color: moreArea.containsMouse ? Qt.rgba(1, 1, 1, 0.18) : "transparent"
+                color: moreArea.containsMouse ? Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.18) : "transparent"
                 Kirigami.Icon { anchors.centerIn: parent; source: "go-next"; isMask: true; color: tile.on ? "#ffffff" : root.subtext; width: 14; height: 14 }
                 MouseArea { id: moreArea; anchors.fill: parent; hoverEnabled: true; onClicked: root.open(tile.moreCmd) }
             }
@@ -186,7 +186,7 @@ PlasmoidItem {
             Layout.preferredWidth: 34
             Layout.preferredHeight: 34
             radius: 17
-            color: srIcon.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.06)
+            color: srIcon.containsMouse ? Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.12) : Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.06)
             Kirigami.Icon { anchors.centerIn: parent; source: sr.iconName; isMask: true; color: root.textColor; width: 18; height: 18 }
             MouseArea { id: srIcon; anchors.fill: parent; hoverEnabled: true; onClicked: sr.iconClicked() }
         }
@@ -253,9 +253,9 @@ PlasmoidItem {
             Tile {
                 iconName: "contrast"
                 label: i18n("Dark mode")
-                on: root.st.scheme !== "BreezeLight"
+                on: root.st.scheme !== "TwilightLight" && root.st.scheme !== "BreezeLight"
                 moreCmd: "twilightos-settings personalisation"
-                onToggled: (value) => { root.set("scheme", value ? "Twilight" : "BreezeLight"); root.act("dark-set " + (value ? "on" : "off")); }
+                onToggled: (value) => { root.set("scheme", value ? "Twilight" : "TwilightLight"); root.act("dark-set " + (value ? "on" : "off")); }
             }
         }
 
@@ -273,7 +273,7 @@ PlasmoidItem {
             onMoved: (v) => root.sh_bright(Math.round(v))
         }
 
-        Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: Qt.rgba(1, 1, 1, 0.08) }
+        Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.08) }
 
         RowLayout {
             Layout.fillWidth: true
@@ -297,7 +297,7 @@ PlasmoidItem {
                     Layout.preferredWidth: 34
                     Layout.preferredHeight: 34
                     radius: 17
-                    color: fArea.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                    color: fArea.containsMouse ? Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.12) : "transparent"
                     Kirigami.Icon { anchors.centerIn: parent; source: modelData.icon; isMask: true; color: root.textColor; width: 18; height: 18 }
                     MouseArea { id: fArea; anchors.fill: parent; hoverEnabled: true; onClicked: root.open(modelData.cmd) }
                     QQC2.ToolTip.visible: fArea.containsMouse

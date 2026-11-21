@@ -31,8 +31,8 @@ log() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
 die() { printf '\033[1;31mERROR: %s\033[0m\n' "$*" >&2; exit 1; }
 
 [[ $EUID -eq 0 ]] || die "run as root (WSL: wsl -d archlinux -u root -- bash scripts/build-iso.sh)"
-for c in mkarchiso git rsync rsvg-convert runuser makepkg repo-add; do
-    command -v "$c" >/dev/null || die "missing '$c' (pacman -S --needed archiso git rsync librsvg base-devel)"
+for c in mkarchiso git rsync rsvg-convert runuser makepkg repo-add grub-mkfont grub-mkstandalone fc-match; do
+    command -v "$c" >/dev/null || die "missing '$c' (pacman -S --needed archiso git rsync librsvg base-devel grub inter-font fontconfig)"
 done
 
 log "Preparing work dir $WORK_ROOT"
@@ -126,6 +126,7 @@ mkdir -p "$AIR/etc/xdg" "$AIR/etc/skel" "$AIR/usr/share/color-schemes"
 rsync -a --no-owner --no-group "$REPO/theme/xdg/" "$AIR/etc/xdg/"
 rsync -a --no-owner --no-group "$REPO/theme/skel/" "$AIR/etc/skel/"
 install -m644 "$REPO/theme/colors/Twilight.colors" "$AIR/usr/share/color-schemes/Twilight.colors"
+install -m644 "$REPO/theme/colors/TwilightLight.colors" "$AIR/usr/share/color-schemes/TwilightLight.colors"
 # kdeglobals = full Twilight colour scheme + our overrides (KConfig merges repeated groups,
 # later keys win). Apps read colours from kdeglobals, not from the scheme name.
 cat "$REPO/theme/colors/Twilight.colors" "$REPO/theme/xdg/kdeglobals" > "$AIR/etc/xdg/kdeglobals"
@@ -148,6 +149,12 @@ cat > "$AIR/usr/share/wallpapers/Twilight/metadata.json" <<'EOF'
 }
 EOF
 
+log "Generating the TwilightOS GRUB theme (ISO boot menu + installed systems)"
+bash "$REPO/scripts/make-grub-theme.sh" "$PROFILE/grub/themes/twilightos" "$DENALI" \
+    "$REPO/theme/branding/twilightos-logo.svg" "$REPO/theme/grub/theme.txt"
+mkdir -p "$AIR/usr/share/grub/themes"
+cp -r "$PROFILE/grub/themes/twilightos" "$AIR/usr/share/grub/themes/twilightos"
+
 log "Staging login (SDDM) and logout screens"
 install -d "$AIR/usr/share/sddm/themes"
 rsync -a --no-owner --no-group "$REPO/theme/sddm/twilightos/" "$AIR/usr/share/sddm/themes/twilightos/"
@@ -167,6 +174,12 @@ log "Installing TwilightOS Task Manager and terminal greeting"
 install -Dm644 "$REPO/apps/taskmanager/Main.qml" "$AIR/usr/share/twilightos/taskmanager/Main.qml"
 install -Dm755 "$REPO/apps/taskmanager/twilightos-taskmanager" "$AIR/usr/local/bin/twilightos-taskmanager"
 install -Dm644 "$REPO/apps/taskmanager/org.twilightos.taskmanager.desktop" "$AIR/usr/share/applications/org.twilightos.taskmanager.desktop"
+
+log "Installing TwilightOS Setup (the installer)"
+install -Dm644 "$REPO/apps/setup/Main.qml" "$AIR/usr/share/twilightos/setup/Main.qml"
+install -Dm755 "$REPO/apps/setup/twilightos-setup" "$AIR/usr/local/bin/twilightos-setup"
+install -Dm755 "$REPO/apps/setup/twilightos-install" "$AIR/usr/local/bin/twilightos-install"
+install -Dm644 "$REPO/apps/setup/org.twilightos.setup.desktop" "$AIR/usr/share/applications/org.twilightos.setup.desktop"
 install -Dm644 "$REPO/theme/terminal/fastfetch.jsonc" "$AIR/usr/share/twilightos/terminal/fastfetch.jsonc"
 install -Dm644 "$REPO/theme/terminal/twilightos-logo.txt" "$AIR/usr/share/twilightos/terminal/twilightos-logo.txt"
 install -Dm755 "$REPO/theme/terminal/twilightos-shell" "$AIR/usr/local/bin/twilightos-shell"

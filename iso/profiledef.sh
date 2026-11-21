@@ -8,8 +8,9 @@ iso_publisher="TwilightOS Project"
 iso_application="TwilightOS Live"
 iso_version="$(date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y.%m.%d)"
 install_dir="arch"
+# BIOS: syslinux. UEFI: GRUB with the TwilightOS theme (iso/grub/, themes/ generated at build).
 bootmodes=('bios.syslinux'
-           'uefi.systemd-boot')
+           'uefi.grub')
 pacman_conf="pacman.conf"
 airootfs_image_type="squashfs"
 # zstd builds much faster than releng's xz at a ~10% size cost; switch to xz for releases.
@@ -31,6 +32,8 @@ file_permissions=(
   ["/usr/local/bin/twilightos-settings"]="0:0:755"
   ["/usr/local/bin/twilightos-settings-helper"]="0:0:755"
   ["/usr/local/bin/twilightos-taskmanager"]="0:0:755"
+  ["/usr/local/bin/twilightos-setup"]="0:0:755"
+  ["/usr/local/bin/twilightos-install"]="0:0:755"
   ["/usr/local/bin/twilightos-shell"]="0:0:755"
   ["/usr/local/bin/twilightos-session-trim"]="0:0:755"
 )

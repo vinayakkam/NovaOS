@@ -24,8 +24,8 @@ PlasmoidItem {
     readonly property color accent: Kirigami.Theme.highlightColor
     readonly property color memColor: "#a46bff"
     readonly property color hot: "#ff6b81"
-    readonly property color textColor: "#f1eee6"
-    readonly property color subtext: "#8f95ad"
+    readonly property color textColor: Kirigami.Theme.textColor
+    readonly property color subtext: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.66)
 
     preferredRepresentation: compactRepresentation
     Plasmoid.backgroundHints: "NoBackground"
@@ -108,7 +108,7 @@ PlasmoidItem {
             Layout.preferredHeight: 4
             Layout.alignment: Qt.AlignVCenter
             radius: 2
-            color: Qt.rgba(1, 1, 1, 0.12)
+            color: Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.12)
             Rectangle {
                 height: parent.height
                 radius: 2
@@ -133,7 +133,7 @@ PlasmoidItem {
             anchors.topMargin: 3
             anchors.bottomMargin: 3
             radius: 6
-            color: area.containsMouse || root.expanded ? Qt.rgba(1, 1, 1, 0.07) : "transparent"
+            color: area.containsMouse || root.expanded ? Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.07) : "transparent"
             Behavior on color { ColorAnimation { duration: 120 } }
         }
         RowLayout {
@@ -187,8 +187,8 @@ PlasmoidItem {
         Layout.fillWidth: true
         Layout.preferredHeight: 124
         radius: 10
-        color: Qt.rgba(1, 1, 1, 0.05)
-        border.color: Qt.rgba(1, 1, 1, 0.08)
+        color: Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.05)
+        border.color: Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.08)
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: 12
@@ -238,7 +238,7 @@ PlasmoidItem {
                 required property int index
                 Layout.fillWidth: true
                 spacing: 10
-                Rectangle { width: 6; height: 6; radius: 3; color: index === 0 ? root.accent : Qt.rgba(1, 1, 1, 0.3) }
+                Rectangle { width: 6; height: 6; radius: 3; color: index === 0 ? root.accent : Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.3) }
                 Text { text: modelData.name; color: root.textColor; font.family: "Inter"; font.pixelSize: 12; elide: Text.ElideRight; Layout.fillWidth: true }
                 Text { text: modelData.cpu; color: root.textColor; font.family: "Inter"; font.pixelSize: 12; font.features: { "tnum": 1 }; Layout.preferredWidth: 48; horizontalAlignment: Text.AlignRight }
                 Text { text: modelData.mem; color: root.subtext; font.family: "Inter"; font.pixelSize: 12; font.features: { "tnum": 1 }; Layout.preferredWidth: 70; horizontalAlignment: Text.AlignRight }

@@ -78,7 +78,7 @@ theme-get)
     echo "scheme=$(kreadconfig6 --file kdeglobals --group General --key ColorScheme --default Twilight)"
     echo "accent=$(kreadconfig6 --file kdeglobals --group General --key AccentColor)"
     ;;
-theme-set)       plasma-apply-colorscheme "$1" >/dev/null ;;           # Twilight | BreezeLight
+theme-set)       plasma-apply-colorscheme "$1" >/dev/null ;;           # Twilight | TwilightLight
 accent-set)
     # plasma-apply-colorscheme --accent-color is a no-op when the scheme is already
     # active, so store the accent ourselves and re-apply the scheme to recolour apps.
@@ -90,7 +90,7 @@ accent-set)
     kwriteconfig6 --file kdeglobals --group General --key AccentColor "$r,$g,$b"
     kwriteconfig6 --file kdeglobals --group General --key accentColorFromWallpaper false
     scheme=$(kreadconfig6 --file kdeglobals --group General --key ColorScheme --default Twilight)
-    [ "$scheme" = BreezeDark ] && other=BreezeLight || other=BreezeDark
+    [ "$scheme" = BreezeDark ] && other=BreezeLight || other=BreezeDark   # flip to any other scheme and back
     plasma-apply-colorscheme "$other" >/dev/null 2>&1
     plasma-apply-colorscheme "$scheme" >/dev/null 2>&1
     ;;
@@ -148,7 +148,7 @@ dnd-set)
     ;;
 bright-set)      brightnessctl -q set "$1%" ;;
 dark-set)
-    if [ "$1" = on ]; then plasma-apply-colorscheme Twilight >/dev/null; else plasma-apply-colorscheme BreezeLight >/dev/null; fi
+    if [ "$1" = on ]; then plasma-apply-colorscheme Twilight >/dev/null; else plasma-apply-colorscheme TwilightLight >/dev/null; fi
     ;;
 mic-get)
     v=$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null)

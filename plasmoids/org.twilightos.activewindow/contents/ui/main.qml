@@ -17,8 +17,8 @@ PlasmoidItem {
     id: root
 
     readonly property color accent: Kirigami.Theme.highlightColor
-    readonly property color textColor: "#f1eee6"
-    readonly property color subtext: "#8f95ad"
+    readonly property color textColor: Kirigami.Theme.textColor
+    readonly property color subtext: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.66)
 
     preferredRepresentation: fullRepresentation
     Plasmoid.backgroundHints: "NoBackground"
@@ -62,7 +62,7 @@ PlasmoidItem {
             anchors.topMargin: 3
             anchors.bottomMargin: 3
             radius: 6
-            color: area.containsMouse ? Qt.rgba(1, 1, 1, 0.07) : "transparent"
+            color: area.containsMouse ? Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.07) : "transparent"
             Behavior on color { ColorAnimation { duration: 120 } }
         }
 

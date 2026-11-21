@@ -36,13 +36,13 @@ QQC2.ApplicationWindow {
     title: "Task Manager"
     color: base
 
-    readonly property color base: "#0d1428"
-    readonly property color side: "#0a1022"
-    readonly property color card: Qt.rgba(1, 1, 1, 0.045)
-    readonly property color border: Qt.rgba(1, 1, 1, 0.07)
-    readonly property color textColor: "#f1eee6"
-    readonly property color subtext: "#aeb3c8"
-    readonly property color dim: "#727892"
+    readonly property color base: Kirigami.Theme.backgroundColor
+    readonly property color side: Qt.darker(Kirigami.Theme.backgroundColor, 1.06)
+    readonly property color card: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.045)
+    readonly property color border: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.07)
+    readonly property color textColor: Kirigami.Theme.textColor
+    readonly property color subtext: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.66)
+    readonly property color dim: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.45)
     readonly property color accent: Kirigami.Theme.highlightColor
     readonly property color cpuColor: accent
     readonly property color memColor: "#a46bff"
@@ -133,7 +133,7 @@ QQC2.ApplicationWindow {
         radius: 6
         opacity: enabledState ? 1 : 0.45
         color: b.primary ? (ba.containsMouse ? Qt.lighter(app.accent, 1.08) : app.accent)
-                         : (ba.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : Qt.rgba(1, 1, 1, 0.06))
+                         : (ba.containsMouse ? Qt.rgba(app.textColor.r, app.textColor.g, app.textColor.b, 0.1) : Qt.rgba(app.textColor.r, app.textColor.g, app.textColor.b, 0.06))
         border.color: b.primary ? "transparent" : app.border
         RowLayout {
             id: br
@@ -156,7 +156,7 @@ QQC2.ApplicationWindow {
             const ctx = getContext("2d");
             ctx.reset();
             const w = width, h = height, n = 60;
-            ctx.strokeStyle = Qt.rgba(1, 1, 1, 0.06);
+            ctx.strokeStyle = Qt.rgba(app.textColor.r, app.textColor.g, app.textColor.b, 0.06);
             ctx.lineWidth = 1;
             for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(0, h * i / 4); ctx.lineTo(w, h * i / 4); ctx.stroke(); }
             if (values.length < 2) return;
@@ -212,7 +212,7 @@ QQC2.ApplicationWindow {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 38
                         radius: 6
-                        color: current ? Qt.rgba(1, 1, 1, 0.07) : (na.containsMouse ? Qt.rgba(1, 1, 1, 0.04) : "transparent")
+                        color: current ? Qt.rgba(app.textColor.r, app.textColor.g, app.textColor.b, 0.07) : (na.containsMouse ? Qt.rgba(app.textColor.r, app.textColor.g, app.textColor.b, 0.04) : "transparent")
                         Rectangle { visible: parent.current; width: 3; height: 16; radius: 1.5; color: app.accent; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
                         RowLayout {
                             anchors.fill: parent
@@ -247,7 +247,7 @@ QQC2.ApplicationWindow {
                         Layout.preferredWidth: 240
                         Layout.preferredHeight: 32
                         radius: 6
-                        color: Qt.rgba(1, 1, 1, 0.06)
+                        color: Qt.rgba(app.textColor.r, app.textColor.g, app.textColor.b, 0.06)
                         border.color: search.activeFocus ? app.accent : app.border
                         TextInput {
                             id: search
@@ -327,7 +327,7 @@ QQC2.ApplicationWindow {
                         required property var model
                         readonly property bool selected: app.selectedPids.length > 0 && JSON.stringify(app.selectedPids) === JSON.stringify(model.PIDs || [])
                         color: selected ? Qt.rgba(app.accent.r, app.accent.g, app.accent.b, 0.22)
-                                        : (row % 2 ? Qt.rgba(1, 1, 1, 0.02) : "transparent")
+                                        : (row % 2 ? Qt.rgba(app.textColor.r, app.textColor.g, app.textColor.b, 0.02) : "transparent")
                         RowLayout {
                             anchors.fill: parent
                             anchors.leftMargin: cell.column === 0 ? 8 : 0

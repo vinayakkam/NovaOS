@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Install TwilightOS
+GenericName=TwilightOS Setup
+Comment=Install TwilightOS on this PC
+Exec=twilightos-setup
+Icon=system-software-install
+Categories=System;
+Keywords=install;setup;installer;disk;
+StartupWMClass=org.twilightos.setup.qml
+StartupNotify=true

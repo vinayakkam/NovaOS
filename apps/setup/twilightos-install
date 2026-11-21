@@ -1,0 +1,225 @@
+#!/usr/bin/env bash
+# TwilightOS installer backend. Run as root from the live session.
+#
+#   twilightos-install --list-disks                     JSON list of installable disks
+#   twilightos-install --disk /dev/sda --user name --fullname "Full Name" \
+#       --hostname pc --timezone Asia/Kolkata --locale en_US.UTF-8 --keymap us
+#       (password on stdin, one line)
+#
+# The install itself runs in the background; progress is written to
+#   /run/twilightos-install/progress   as "percent|message"  (percent -1 = failed)
+# and the full log to /run/twilightos-install/install.log
+set -euo pipefail
+
+STATE=/run/twilightos-install
+TARGET=/mnt/twilightos-target
+SFS=/run/archiso/bootmnt/arch/x86_64/airootfs.sfs
+KERNEL=/run/archiso/bootmnt/arch/boot/x86_64/vmlinuz-linux
+
+# ---------------------------------------------------------------- disk list
+list_disks() {
+    # the disk holding the live medium must not be offered
+    local live
+    live=$(findmnt -no SOURCE /run/archiso/bootmnt 2>/dev/null | xargs -r lsblk -no PKNAME 2>/dev/null | head -n1 || true)
+    local first=1 line NAME SIZE MODEL TYPE TRAN RM RO
+    printf '['
+    while IFS= read -r line; do
+        eval "$line"    # lsblk -P prints NAME="sda" SIZE="..." with the values quoted
+        [[ "$TYPE" == disk && "$RO" == 0 && "$NAME" != "${live:-none}" ]] || continue
+        [[ "$NAME" == loop* || "$NAME" == sr* || "$NAME" == zram* ]] && continue
+        (( SIZE >= 20 * 1024 * 1024 * 1024 )) || continue
+        MODEL=${MODEL//\"/}; MODEL=${MODEL:-Disk}
+        (( first )) || printf ','
+        first=0
+        printf '{"path":"/dev/%s","size":%s,"model":"%s","bus":"%s","removable":%s}' \
+            "$NAME" "$SIZE" "$MODEL" "$TRAN" "$([[ $RM == 1 ]] && echo true || echo false)"
+    done < <(lsblk -P -d -b -o NAME,SIZE,MODEL,TYPE,TRAN,RM,RO)
+    printf ']\n'
+}
+
+if [[ "${1:-}" == "--list-disks" ]]; then
+    list_disks
+    exit 0
+fi
+
+# ---------------------------------------------------------------- arguments
+DISK="" USERNAME="" FULLNAME="" HOSTNAME_="twilightos" TIMEZONE="UTC" LOCALE="en_US.UTF-8" KEYMAP="us"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --disk) DISK=$2; shift 2 ;;
+        --user) USERNAME=$2; shift 2 ;;
+        --fullname) FULLNAME=$2; shift 2 ;;
+        --hostname) HOSTNAME_=$2; shift 2 ;;
+        --timezone) TIMEZONE=$2; shift 2 ;;
+        --locale) LOCALE=$2; shift 2 ;;
+        --keymap) KEYMAP=$2; shift 2 ;;
+        *) echo "unknown option $1" >&2; exit 2 ;;
+    esac
+done
+[[ $EUID -eq 0 ]] || { echo "must run as root" >&2; exit 1; }
+[[ -b "$DISK" ]] || { echo "not a disk: $DISK" >&2; exit 2; }
+[[ "$USERNAME" =~ ^[a-z_][a-z0-9_-]{0,30}$ ]] || { echo "bad user name" >&2; exit 2; }
+[[ "$HOSTNAME_" =~ ^[A-Za-z0-9-]{1,63}$ ]] || { echo "bad computer name" >&2; exit 2; }
+[[ -f "/usr/share/zoneinfo/$TIMEZONE" ]] || { echo "bad time zone" >&2; exit 2; }
+IFS= read -r PASSWORD || true
+[[ -n "$PASSWORD" ]] || { echo "empty password" >&2; exit 2; }
+
+mkdir -p "$STATE"
+chmod 755 "$STATE"          # the Setup window reads progress; the password file itself is 600
+printf '%s' "$PASSWORD" > "$STATE/pw"
+chmod 600 "$STATE/pw"
+unset PASSWORD
+echo "0|Starting" > "$STATE/progress"
+
+# ---------------------------------------------------------------- the install (background)
+install_system() {
+    progress() { echo "$1|$2" > "$STATE/progress"; echo "== $1% $2"; }
+    fail() { echo "-1|$1" > "$STATE/progress"; echo "!! $1"; cleanup; exit 1; }
+    cleanup() { sync; umount -R "$TARGET" 2>/dev/null || true; rm -f "$STATE/pw"; }
+    trap 'fail "Setup stopped unexpectedly (line $LINENO). See $STATE/install.log"' ERR
+
+    local uefi=0
+    [[ -d /sys/firmware/efi ]] && uefi=1
+    local p=""
+    [[ "$DISK" =~ [0-9]$ ]] && p="p"          # nvme0n1 -> nvme0n1p1
+    local ESP="${DISK}${p}1" ROOT="${DISK}${p}2"
+
+    # ---- disk
+    progress 2 "Preparing $DISK"
+    umount -R "$TARGET" 2>/dev/null || true
+    swapoff -a 2>/dev/null || true
+    for part in $(lsblk -lno PATH "$DISK" | tail -n +2); do umount "$part" 2>/dev/null || true; done
+    wipefs -af "$DISK" >/dev/null
+    sgdisk --zap-all "$DISK" >/dev/null
+    if (( uefi )); then
+        sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -n2:0:0 -t2:8304 -c2:TwilightOS "$DISK" >/dev/null
+    else
+        sgdisk -n1:0:+1M -t1:ef02 -c1:BIOS-boot -n2:0:0 -t2:8304 -c2:TwilightOS "$DISK" >/dev/null
+    fi
+    partprobe "$DISK" 2>/dev/null || true
+    udevadm settle
+    sleep 1
+
+    progress 5 "Formatting"
+    (( uefi )) && mkfs.fat -F 32 -n EFI "$ESP" >/dev/null
+    mkfs.btrfs -f -L TwilightOS "$ROOT" >/dev/null
+    mkdir -p "$TARGET"
+    mount "$ROOT" "$TARGET"
+    for sv in @ @home @snapshots @var_log @pkg; do btrfs subvolume create "$TARGET/$sv" >/dev/null; done
+    umount "$TARGET"
+    local opts="noatime,compress=zstd:1"
+    mount -o "$opts,subvol=@" "$ROOT" "$TARGET"
+    mkdir -p "$TARGET"/{home,.snapshots,var/log,var/cache/pacman/pkg,efi}
+    mount -o "$opts,subvol=@home" "$ROOT" "$TARGET/home"
+    mount -o "$opts,subvol=@snapshots" "$ROOT" "$TARGET/.snapshots"
+    mount -o "$opts,subvol=@var_log" "$ROOT" "$TARGET/var/log"
+    mount -o "$opts,subvol=@pkg" "$ROOT" "$TARGET/var/cache/pacman/pkg"
+    (( uefi )) && mount "$ESP" "$TARGET/efi"
+
+    # ---- copy the system image (the pristine one on the ISO, not the live overlay)
+    progress 8 "Copying TwilightOS to your disk"
+    [[ -f "$SFS" ]] || fail "System image not found ($SFS)"
+    unsquashfs -f -d "$TARGET" -percentage "$SFS" 2>/dev/null | while read -r pct; do
+        [[ "$pct" =~ ^[0-9]+$ ]] && progress $(( 8 + pct * 62 / 100 )) "Copying TwilightOS to your disk"
+    done
+    [[ -f "$TARGET/boot/vmlinuz-linux" ]] || install -Dm644 "$KERNEL" "$TARGET/boot/vmlinuz-linux"
+
+    # ---- turn the live system into an installed one
+    progress 71 "Removing live-session settings"
+    rm -f "$TARGET"/etc/systemd/system/multi-user.target.wants/{twilightos-live-user,pacman-init,choose-mirror,livecd-talk}.service \
+          "$TARGET"/etc/systemd/system/sound.target.wants/livecd-alsa-unmuter.service \
+          "$TARGET"/etc/systemd/system/timers.target.wants/twilightos-memreport.timer \
+          "$TARGET"/etc/systemd/system/{twilightos-live-user,twilightos-memreport,pacman-init,choose-mirror,livecd-talk,livecd-alsa-unmuter}.service \
+          "$TARGET"/etc/systemd/system/twilightos-memreport.timer \
+          "$TARGET"/etc/sudoers.d/10-twilightos-live \
+          "$TARGET"/etc/mkinitcpio.conf.d/archiso.conf \
+          "$TARGET"/etc/systemd/journald.conf.d/volatile-storage.conf \
+          "$TARGET"/etc/systemd/logind.conf.d/do-not-suspend.conf \
+          "$TARGET"/usr/local/bin/{twilightos-live-user,twilightos-memreport,twilightos-install,twilightos-setup,choose-mirror,Installation_guide,livecd-sound} \
+          "$TARGET"/usr/share/applications/org.twilightos.setup.desktop \
+          "$TARGET"/root/.automated_script.sh "$TARGET"/root/.zlogin
+    rm -rf "$TARGET"/usr/share/twilightos/setup "$TARGET"/etc/systemd/system/etc-pacman.d-gnupg.mount
+    cat > "$TARGET/etc/sddm.conf.d/10-twilightos.conf" <<'EOF'
+[Theme]
+Current=twilightos
+CursorTheme=breeze_cursors
+
+[General]
+DisplayServer=wayland
+GreeterEnvironment=QT_WAYLAND_SHELL_INTEGRATION=layer-shell
+
+[Wayland]
+CompositorCommand=kwin_wayland --drm --no-lockscreen --no-global-shortcuts --locale1
+EOF
+    echo "Welcome to TwilightOS." > "$TARGET/etc/motd"
+
+    progress 74 "Setting up language, time and keyboard"
+    genfstab -U "$TARGET" | grep -v '^#' > "$TARGET/etc/fstab"
+    echo "$HOSTNAME_" > "$TARGET/etc/hostname"
+    printf '127.0.0.1 localhost\n::1 localhost\n127.0.1.1 %s.localdomain %s\n' "$HOSTNAME_" "$HOSTNAME_" > "$TARGET/etc/hosts"
+    ln -sf "/usr/share/zoneinfo/$TIMEZONE" "$TARGET/etc/localtime"
+    sed -i "s/^#\(${LOCALE//./\\.} \)/\1/" "$TARGET/etc/locale.gen"
+    grep -q "^en_US.UTF-8" "$TARGET/etc/locale.gen" || sed -i 's/^#\(en_US\.UTF-8 \)/\1/' "$TARGET/etc/locale.gen"
+    echo "LANG=$LOCALE" > "$TARGET/etc/locale.conf"
+    echo "KEYMAP=$KEYMAP" > "$TARGET/etc/vconsole.conf"
+    mkdir -p "$TARGET/etc/X11/xorg.conf.d"
+    printf 'Section "InputClass"\n  Identifier "keyboard"\n  MatchIsKeyboard "on"\n  Option "XkbLayout" "%s"\nEndSection\n' "$KEYMAP" \
+        > "$TARGET/etc/X11/xorg.conf.d/00-keyboard.conf"
+    arch-chroot "$TARGET" locale-gen >/dev/null
+    arch-chroot "$TARGET" hwclock --systohc 2>/dev/null || true
+
+    progress 78 "Creating your account"
+    arch-chroot "$TARGET" useradd -m -G wheel,audio,video -s /bin/bash -c "$FULLNAME" "$USERNAME"
+    printf '%s:%s\n' "$USERNAME" "$(cat "$STATE/pw")" | arch-chroot "$TARGET" chpasswd
+    rm -f "$STATE/pw"
+    arch-chroot "$TARGET" passwd -l root >/dev/null
+    echo '%wheel ALL=(ALL:ALL) ALL' > "$TARGET/etc/sudoers.d/10-wheel"
+    chmod 440 "$TARGET/etc/sudoers.d/10-wheel"
+
+    progress 82 "Preparing the boot image"
+    arch-chroot "$TARGET" mkinitcpio -P >/dev/null 2>&1 || arch-chroot "$TARGET" mkinitcpio -p linux
+
+    progress 90 "Installing the TwilightOS bootloader"
+    install -d "$TARGET/boot/grub/themes"
+    cp -r /usr/share/grub/themes/twilightos "$TARGET/boot/grub/themes/twilightos"
+    sed -i \
+        -e 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="TwilightOS"/' \
+        -e 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=3/' \
+        -e 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet loglevel=3 splash"/' \
+        -e 's|^#\?GRUB_THEME=.*|GRUB_THEME="/boot/grub/themes/twilightos/theme.txt"|' \
+        -e 's/^GRUB_GFXMODE=.*/GRUB_GFXMODE=1920x1080,1600x900,1366x768,auto/' \
+        "$TARGET/etc/default/grub"
+    grep -q '^GRUB_THEME=' "$TARGET/etc/default/grub" || echo 'GRUB_THEME="/boot/grub/themes/twilightos/theme.txt"' >> "$TARGET/etc/default/grub"
+    if (( uefi )); then
+        arch-chroot "$TARGET" grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=TwilightOS --recheck >/dev/null
+        # also the fallback path, for firmware that forgets boot entries
+        arch-chroot "$TARGET" grub-install --target=x86_64-efi --efi-directory=/efi --removable --recheck >/dev/null
+    else
+        arch-chroot "$TARGET" grub-install --target=i386-pc "$DISK" >/dev/null
+    fi
+    arch-chroot "$TARGET" grub-mkconfig -o /boot/grub/grub.cfg >/dev/null 2>&1
+
+    progress 95 "Turning on snapshots and services"
+    # Snapper wants to create /.snapshots itself; give it ours afterwards
+    umount "$TARGET/.snapshots"
+    rmdir "$TARGET/.snapshots"
+    arch-chroot "$TARGET" snapper --no-dbus -c root create-config / >/dev/null 2>&1 || true
+    btrfs subvolume delete "$TARGET/.snapshots" >/dev/null 2>&1 || true
+    mkdir -p "$TARGET/.snapshots"
+    mount -o "noatime,compress=zstd:1,subvol=@snapshots" "$ROOT" "$TARGET/.snapshots"
+    chmod 750 "$TARGET/.snapshots"
+    for unit in NetworkManager bluetooth systemd-timesyncd fstrim.timer snapper-cleanup.timer; do
+        arch-chroot "$TARGET" systemctl enable "$unit" >/dev/null 2>&1 || true
+    done
+    ln -sf /usr/lib/systemd/system/sddm.service "$TARGET/etc/systemd/system/display-manager.service"
+
+    progress 99 "Finishing up"
+    trap - ERR
+    cleanup
+    progress 100 "TwilightOS is installed"
+}
+
+: > "$STATE/install.log"
+install_system >> "$STATE/install.log" 2>&1 &
+disown
+echo "started"

@@ -51,7 +51,7 @@ dock.height = 2 * Math.ceil(gridUnit * 2.7 / 2);
 dock.floating = true;
 dock.alignment = "center";
 dock.lengthMode = "fit";
-dock.hiding = "dodgewindows";
+dock.hiding = "none";            // always shown; windows stop above it (dodge was unreliable)
 
 dock.addWidget("org.twilightos.startmenu");
 
