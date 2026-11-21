@@ -1,0 +1,18 @@
+#!/bin/sh
+# Runs once per login (from /etc/xdg/autostart). Frees memory held by background
+# daemons that Plasma wakes at first login but that this user isn't using.
+# Everything here restarts on demand (D-Bus activation) when actually needed.
+sleep 20
+
+# KDE Connect: Plasma's tray loads its widget once on first login, which starts
+# kdeconnectd (~55 MB). Stop it again unless a phone has been paired.
+if pgrep -u "$(id -u)" -x kdeconnectd >/dev/null 2>&1; then
+    trusted="$HOME/.config/kdeconnect/trusted_devices"
+    if [ ! -s "$trusted" ]; then
+        pkill -u "$(id -u)" -x kdeconnectd
+    fi
+fi
+
+# KRunner's file-search helper is only needed while searching.
+pkill -u "$(id -u)" -x baloorunner 2>/dev/null
+exit 0

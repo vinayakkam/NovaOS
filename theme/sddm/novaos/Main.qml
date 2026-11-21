@@ -158,7 +158,8 @@ Rectangle {
                     // SDDM already gives a file:// URL (or a plain path on older versions)
                     source: {
                         const f = root.currentUser ? String(root.currentUser.face || "") : "";
-                        if (f === "") return "file:///usr/share/pixmaps/novaos-avatar.png";
+                        // no picture, or SDDM's own stock face: use the NovaOS default
+                        if (f === "" || f.includes("/sddm/faces/")) return "file:///usr/share/pixmaps/novaos-avatar.png";
                         return f.startsWith("file:") ? f : "file://" + f;
                     }
                     fillMode: Image.PreserveAspectCrop

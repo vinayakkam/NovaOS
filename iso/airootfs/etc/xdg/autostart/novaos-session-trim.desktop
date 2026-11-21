@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=NovaOS session trim
+Comment=Stops unused background helpers after sign-in to save memory
+Exec=/usr/local/bin/novaos-session-trim
+NoDisplay=true
+OnlyShowIn=KDE;
+X-KDE-autostart-phase=2
