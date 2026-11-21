@@ -53,23 +53,30 @@ PlasmoidItem {
         }
     }
 
-    // Busiest processes by live CPU, read only while the box is open
-    Process.ProcessDataModel {
-        id: procs
-        enabled: root.expanded
-        flatList: true
-        enabledAttributes: ["name", "usage", "vmPSS"]
+    // Busiest processes by live CPU. The process model exists only while the box is
+    // open (created fresh each time: a model switched on later never filled).
+    Loader {
+        id: procLoader
+        active: root.expanded
+        sourceComponent: Component {
+            Process.ProcessDataModel {
+                enabled: true
+                flatList: true
+                enabledAttributes: ["name", "usage", "vmPSS"]
+            }
+        }
     }
     KItemModels.KSortFilterProxyModel {
         id: busiest
-        sourceModel: procs
+        sourceModel: procLoader.item
         sortColumn: 1
         sortRoleName: "Value"
         sortOrder: Qt.DescendingOrder
     }
-    property var top: []
+    property var busiestRows: []      // ("top" is a built-in property)
     function refreshTop() {
         const rows = [];
+        if (!procLoader.item) { busiestRows = rows; return; }
         const n = Math.min(5, busiest.rowCount());
         for (let r = 0; r < n; r++) {
             rows.push({
@@ -78,7 +85,7 @@ PlasmoidItem {
                 mem: busiest.data(busiest.index(r, 2), Qt.DisplayRole) || ""
             });
         }
-        top = rows;
+        busiestRows = rows;
     }
 
     P5Support.DataSource {
@@ -225,7 +232,7 @@ PlasmoidItem {
             Text { text: "Memory"; color: root.subtext; font.family: "Inter"; font.pixelSize: 11; Layout.preferredWidth: 70; horizontalAlignment: Text.AlignRight }
         }
         Repeater {
-            model: root.top
+            model: root.busiestRows
             delegate: RowLayout {
                 required property var modelData
                 required property int index
@@ -237,7 +244,7 @@ PlasmoidItem {
                 Text { text: modelData.mem; color: root.subtext; font.family: "Inter"; font.pixelSize: 12; font.features: { "tnum": 1 }; Layout.preferredWidth: 70; horizontalAlignment: Text.AlignRight }
             }
         }
-        Text { visible: root.top.length === 0; text: "Reading processes…"; color: root.subtext; font.family: "Inter"; font.pixelSize: 12 }
+        Text { visible: root.busiestRows.length === 0; text: "Reading processes…"; color: root.subtext; font.family: "Inter"; font.pixelSize: 12 }
 
         Rectangle {
             Layout.fillWidth: true

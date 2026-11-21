@@ -1,10 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <style id="current-color-scheme">.ColorScheme-Highlight{color:#f2683a;}.ColorScheme-Text{color:#f1eee6;}</style>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#1d2a4d"/><stop offset="1" stop-color="#0d1428"/>
     </linearGradient>
-    <linearGradient id="fg" gradientUnits="userSpaceOnUse" x1="12" y1="12" x2="36" y2="36">
-      <stop offset="0" stop-color="#4f8cff"/><stop offset="1" stop-color="#a46bff"/>
+    <linearGradient id="sheen" gradientUnits="userSpaceOnUse" x1="12" y1="12" x2="36" y2="36">
+      <stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="hl" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/>
@@ -14,5 +15,6 @@
   <rect x="3" y="3" width="42" height="42" rx="11" fill="url(#bg)"/>
   <rect x="3" y="3" width="42" height="42" rx="11" fill="url(#hl)"/>
   <rect x="3.5" y="3.5" width="41" height="41" rx="10.5" fill="none" stroke="#fff" stroke-opacity=".10"/>
-  <g fill="url(#fg)" stroke="url(#fg)"><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(0 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(45 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(90 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(135 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(180 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(225 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(270 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(315 24 24)"/><circle stroke="none" cx="24" cy="24" r="9"/><circle stroke="none" fill="#0d1428" cx="24" cy="24" r="3.6"/></g>
+  <g class="ColorScheme-Highlight" fill="currentColor" stroke="currentColor"><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(0 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(45 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(90 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(135 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(180 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(225 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(270 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(315 24 24)"/><circle stroke="none" cx="24" cy="24" r="9"/><circle stroke="none" fill="#0d1428" cx="24" cy="24" r="3.6"/></g>
+  <g fill="url(#sheen)" stroke="url(#sheen)"><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(0 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(45 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(90 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(135 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(180 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(225 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(270 24 24)"/><rect stroke="none" x="22" y="11" width="4" height="6" rx="1.2" transform="rotate(315 24 24)"/><circle stroke="none" cx="24" cy="24" r="9"/><circle stroke="none" fill="#0d1428" cx="24" cy="24" r="3.6"/></g>
 </svg>

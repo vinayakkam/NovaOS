@@ -7,5 +7,5 @@ Exec=twilightos-taskmanager
 Icon=utilities-system-monitor
 Categories=System;Monitor;
 Keywords=task manager;processes;end task;kill;cpu;memory;performance;
-StartupWMClass=qml
+StartupWMClass=org.twilightos.taskmanager.qml
 X-KDE-Shortcuts=Ctrl+Shift+Esc

@@ -1,7 +1,7 @@
 // TwilightOS "Twilight" layout for Plasma (runs once, on a user's first Plasma start).
 //
 //  Top bar (slim, solid):
-//      [mark  App  window title]  ·····  [ddd d MMM  HH:mm]  ·····  [CPU ▬ 5%  RAM ▬ 23%] [tray] [power]
+//      [mark  App  window title]  ·····  [ddd d MMM  HH:mm]  ·····  [CPU ▬  RAM ▬] [bell] [Quick Settings]
 //  Dock:   floating, centered, sized to its icons, moves out of the way of windows:
 //      [TwilightOS Start] [pinned / running apps]
 //
@@ -32,43 +32,17 @@ top.addWidget("org.twilightos.topclock");
 top.addWidget("org.kde.plasma.panelspacer");
 top.addWidget("org.twilightos.meters");
 
-// System tray with only the essentials. Each tray item is a full applet inside
-// plasmashell, and some start daemons (KDE Connect), so the list is explicit.
-// "knownItems" must also name the ones we hide: the tray auto-adds any item it
-// has never seen before.
-var tray = top.addWidget("org.kde.plasma.systemtray");
-var trayContainment = desktopById(tray.readConfig("SystrayContainmentId"));
-if (trayContainment) {
-    var shown = [
-        "org.kde.plasma.notifications",
-        "org.kde.plasma.volume",
-        "org.kde.plasma.networkmanagement",
-        "org.kde.plasma.bluetooth",
-        "org.kde.plasma.battery",
-        "org.kde.plasma.brightness",
-        "org.kde.plasma.devicenotifier",
-        "org.kde.plasma.clipboard",
-        "org.kde.plasma.keyboardlayout",
-        "org.kde.plasma.mediacontroller"
-    ];
-    var hidden = [
-        "org.kde.kdeconnect",
-        "org.kde.plasma.printmanager",
-        "org.kde.plasma.vault",
-        "org.kde.plasma.cameraindicator",
-        "org.kde.plasma.keyboardindicator",
-        "org.kde.plasma.manage-inputmethod",
-        "org.kde.plasma.nightlight",
-        "org.kde.plasma.weather",
-        "org.kde.kscreen",
-        "org.kde.plasma.addons.katesessions",
-        "org.kde.plasma.vault"
-    ];
-    trayContainment.currentConfigGroup = ["General"];
-    trayContainment.writeConfig("extraItems", shown);
-    trayContainment.writeConfig("knownItems", shown.concat(hidden));
-}
-top.addWidget("org.kde.plasma.lock_logout");
+// No Plasma system tray: network, volume, battery, Bluetooth and brightness all live
+// in TwilightOS Quick Settings, and notifications get their own bell. (The tray loads
+// every default item the moment it is created, before a layout script can trim it,
+// which also woke KDE Connect and kept ~10 hidden applets in memory.)
+
+// Bell: opens Plasma's notification history. Everything to its right is Quick Settings.
+var bell = top.addWidget("org.kde.plasma.notifications");
+var qs = top.addWidget("org.twilightos.quicksettings");
+// Meta+N / Meta+A like Windows. Guarded: a failure here must not stop the layout.
+try { bell.globalShortcut = "Meta+N"; } catch (e) { print("bell shortcut: " + e); }
+try { qs.globalShortcut = "Meta+A"; } catch (e) { print("quick settings shortcut: " + e); }
 
 // ---------------- Dock ----------------
 var dock = new Panel;

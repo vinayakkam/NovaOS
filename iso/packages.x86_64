@@ -105,6 +105,7 @@ wine-gecko
 
 # --- CLI basics ---
 fastfetch
+brightnessctl
 git
 nano
 vim

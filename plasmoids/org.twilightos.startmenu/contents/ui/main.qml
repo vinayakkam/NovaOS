@@ -1,7 +1,8 @@
 /*
-    TwilightOS Start menu, a Plasma port of the Twilight desktop's Start menu:
-    search (KRunner: apps, settings, files, calculator), pinned grid,
-    recent items, alphabetical "All apps", and a user / power strip.
+    TwilightOS "Dusk" launcher.
+      Left  - the "now" panel: clock, search, recent items, you, lock/settings/power.
+      Right - the app shelf: category tabs (Favourites, All, Internet, Office, ...)
+              over a grid of app bubbles; search results replace the shelf.
 
     SPDX-FileCopyrightText: 2026 TwilightOS Project
     SPDX-License-Identifier: GPL-2.0-or-later
@@ -40,13 +41,13 @@ PlasmoidItem {
     toolTipMainText: i18n("Start")
     toolTipSubText: ""
 
-    property string page: "home"   // home | all
+    property int shelf: -1          // -1 favourites, 0 all apps, n>0 a category row of rootModel
     property string query: ""
 
     onExpandedChanged: () => {
         if (root.expanded) {
             root.query = "";
-            root.page = "home";
+            root.shelf = -1;
         }
     }
 
@@ -61,7 +62,7 @@ PlasmoidItem {
         sorted: true
         showSeparators: false
         showAllApps: true
-        showAllAppsCategorized: false
+        showAllAppsCategorized: true    // rows after "All applications" are the categories
         showRecentApps: false
         showRecentDocs: false
         showPowerSession: false
@@ -192,392 +193,495 @@ PlasmoidItem {
         }
     }
 
+
+
     // ---------- Popup ----------
+    // the command runs through a shell, so $HOME expands there (KUser has no home folder property)
+    function openPath(sub) { exec.run("dolphin \"$HOME" + (sub ? "/" + sub : "") + "\""); }
+    function logoutPrompt(kind) {
+        exec.run("dbus-send --session --type=method_call --dest=org.kde.LogoutPrompt /LogoutPrompt org.kde.LogoutPrompt." + kind);
+    }
+    readonly property var shelfModel: shelf < 0 ? pinsModel : (rootModel.count > shelf ? rootModel.modelForRow(shelf) : null)
+    property date now: new Date()
+    Timer { interval: 10000; running: root.expanded; repeat: true; triggeredOnStart: true; onTriggered: root.now = new Date() }
+
     fullRepresentation: Item {
         id: menu
-        Layout.preferredWidth: Kirigami.Units.gridUnit * 36
-        Layout.preferredHeight: Kirigami.Units.gridUnit * 38
-        Layout.minimumWidth: Kirigami.Units.gridUnit * 30
-        Layout.minimumHeight: Kirigami.Units.gridUnit * 30
+        Layout.preferredWidth: Kirigami.Units.gridUnit * 46
+        Layout.preferredHeight: Kirigami.Units.gridUnit * 30
+        Layout.minimumWidth: Kirigami.Units.gridUnit * 40
+        Layout.minimumHeight: Kirigami.Units.gridUnit * 26
 
         property int selected: 0
+        property bool powerOpen: false
 
         Connections {
             target: root
             function onExpandedChanged() {
                 if (root.expanded) {
                     search.text = "";
+                    menu.powerOpen = false;
+                    root.shelf = -1;
                     search.forceActiveFocus();
                 }
             }
         }
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Kirigami.Units.gridUnit
-            anchors.bottomMargin: strip.height + Kirigami.Units.largeSpacing
-            spacing: Kirigami.Units.gridUnit
-
-            // ---- Search ----
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 44
-                radius: 22
-                color: Qt.rgba(1, 1, 1, 0.07)
-                border.color: search.activeFocus ? Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.55) : root.border
-
-                Kirigami.Icon {
-                    id: searchIcon
-                    anchors.left: parent.left
-                    anchors.leftMargin: 16
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 18; height: 18
-                    source: "edit-find"
-                    color: root.subtext
-                    isMask: true
-                }
-                TextInput {
-                    id: search
-                    anchors.left: searchIcon.right
-                    anchors.leftMargin: 10
-                    anchors.right: parent.right
-                    anchors.rightMargin: 16
-                    anchors.verticalCenter: parent.verticalCenter
-                    color: root.textColor
-                    selectionColor: root.accent
-                    font.family: "Inter"
-                    font.pixelSize: 14
-                    clip: true
-                    onTextChanged: { root.query = text.trim(); menu.selected = 0; }
-                    Keys.onEscapePressed: root.expanded = false
-                    Keys.onDownPressed: menu.selected = Math.min(menu.selected + 1, (root.results ? root.results.count : 1) - 1)
-                    Keys.onUpPressed: menu.selected = Math.max(menu.selected - 1, 0)
-                    Keys.onReturnPressed: menu.runResult(menu.selected)
-                    Keys.onEnterPressed: menu.runResult(menu.selected)
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        visible: !search.text
-                        text: i18n("Search for apps, settings and files")
-                        color: root.dim
-                        font.family: "Inter"
-                        font.pixelSize: 14
-                    }
-                }
-            }
-
-            // ---- Content ----
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                clip: true
-
-                // ======== Search results ========
-                ListView {
-                    id: resultsView
-                    anchors.fill: parent
-                    visible: root.query !== ""
-                    model: root.results
-                    currentIndex: menu.selected
-                    spacing: 2
-                    boundsBehavior: Flickable.StopAtBounds
-                    delegate: Tile {
-                        required property int index
-                        required property var model
-                        width: resultsView.width
-                        height: 52
-                        active: index === menu.selected
-                        onActivated: { root.results.trigger(index, "", null); root.expanded = false; }
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 12
-                            anchors.rightMargin: 12
-                            spacing: 14
-                            Kirigami.Icon { source: model.decoration; Layout.preferredWidth: 30; Layout.preferredHeight: 30 }
-                            ColumnLayout {
-                                spacing: 0
-                                Layout.fillWidth: true
-                                Text { text: model.display; color: root.textColor; font.family: "Inter"; font.pixelSize: 13; font.weight: Font.Medium; elide: Text.ElideRight; Layout.fillWidth: true }
-                                Text { text: model.description || ""; visible: text !== ""; color: root.subtext; font.family: "Inter"; font.pixelSize: 11; elide: Text.ElideRight; Layout.fillWidth: true }
-                            }
-                        }
-                    }
-                    Text {
-                        anchors.centerIn: parent
-                        visible: !runnerModel.querying && (!root.results || root.results.count === 0)
-                        text: i18n("No results for “%1”", root.query)
-                        color: root.subtext
-                        font.family: "Inter"
-                    }
-                }
-
-                // ======== All apps ========
-                ColumnLayout {
-                    anchors.fill: parent
-                    visible: root.query === "" && root.page === "all"
-                    spacing: 10
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: i18n("All apps"); color: root.textColor; font.family: "Inter"; font.pixelSize: 15; font.weight: Font.DemiBold; Layout.fillWidth: true }
-                        Pill { label: i18n("Back"); iconName: "go-previous"; iconFirst: true; onClicked: root.page = "home" }
-                    }
-                    ListView {
-                        id: allList
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        clip: true
-                        model: appsModel
-                        boundsBehavior: Flickable.StopAtBounds
-                        section.property: "display"
-                        section.criteria: ViewSection.FirstCharacter
-                        section.delegate: Text {
-                            required property string section
-                            text: section.toUpperCase()
-                            color: root.accent
-                            font.family: "Inter"
-                            font.pixelSize: 12
-                            font.weight: Font.DemiBold
-                            leftPadding: 12
-                            height: 30
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        delegate: Tile {
-                            required property int index
-                            required property var model
-                            width: allList.width - 8
-                            height: 42
-                            onActivated: { appsModel.trigger(index, "", null); root.expanded = false; }
-                            onContextRequested: root.togglePin(model.favoriteId)
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: 12
-                                spacing: 14
-                                Kirigami.Icon { source: model.decoration; Layout.preferredWidth: 26; Layout.preferredHeight: 26 }
-                                Text { text: model.display; color: root.textColor; font.family: "Inter"; font.pixelSize: 13; Layout.fillWidth: true; elide: Text.ElideRight }
-                                Kirigami.Icon {
-                                    visible: root.isPinned(model.favoriteId)
-                                    source: "twilightos-start"
-                                    Layout.preferredWidth: 14; Layout.preferredHeight: 14
-                                    Layout.rightMargin: 12
-                                    opacity: 0.8
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // ======== Home: pinned + recommended ========
-                ColumnLayout {
-                    anchors.fill: parent
-                    visible: root.query === "" && root.page === "home"
-                    spacing: 10
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: i18n("Pinned"); color: root.textColor; font.family: "Inter"; font.pixelSize: 15; font.weight: Font.DemiBold; Layout.fillWidth: true; leftPadding: 4 }
-                        Pill { label: i18n("All apps"); iconName: "go-next"; onClicked: root.page = "all" }
-                    }
-
-                    // Pinned apps, in pin order. Right-click a tile to unpin.
-                    Flow {
-                        id: pinnedFlow
-                        Layout.fillWidth: true
-                        readonly property real cell: width / 6
-                        Repeater {
-                            model: pinsModel
-                            delegate: Item {
-                                required property int index
-                                required property var model
-                                width: pinnedFlow.cell
-                                height: 92
-                                visible: index < 18
-                                Tile {
-                                    width: pinnedFlow.cell - 6
-                                    height: 86
-                                    onActivated: { pinsModel.trigger(index, "", null); root.expanded = false; }
-                                    onContextRequested: root.togglePin(model.favoriteId)
-                                    Column {
-                                        anchors.centerIn: parent
-                                        spacing: 8
-                                        Kirigami.Icon {
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                            source: model.decoration
-                                            width: 38; height: 38
-                                        }
-                                        Text {
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                            width: pinnedFlow.cell - 14
-                                            horizontalAlignment: Text.AlignHCenter
-                                            text: model.display
-                                            color: root.textColor
-                                            font.family: "Inter"
-                                            font.pixelSize: 12
-                                            elide: Text.ElideRight
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Text { text: i18n("Recommended"); color: root.textColor; font.family: "Inter"; font.pixelSize: 15; font.weight: Font.DemiBold; leftPadding: 4; Layout.topMargin: 6 }
-
-                    GridView {
-                        id: recent
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        clip: true
-                        interactive: false
-                        cellWidth: width / 2
-                        cellHeight: 56
-                        model: recentModel
-                        delegate: Tile {
-                            required property int index
-                            required property var model
-                            width: recent.cellWidth - 6
-                            height: recent.cellHeight - 4
-                            visible: index < 6
-                            onActivated: { recentModel.trigger(index, "", null); root.expanded = false; }
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: 10
-                                anchors.rightMargin: 10
-                                spacing: 12
-                                Kirigami.Icon { source: model.decoration; Layout.preferredWidth: 30; Layout.preferredHeight: 30 }
-                                ColumnLayout {
-                                    spacing: 0
-                                    Layout.fillWidth: true
-                                    Text { text: model.display; color: root.textColor; font.family: "Inter"; font.pixelSize: 12; font.weight: Font.Medium; elide: Text.ElideRight; Layout.fillWidth: true }
-                                    Text { text: model.description || ""; visible: text !== ""; color: root.subtext; font.family: "Inter"; font.pixelSize: 11; elide: Text.ElideRight; Layout.fillWidth: true }
-                                }
-                            }
-                        }
-                        Text {
-                            visible: recent.count === 0
-                            width: parent.width
-                            leftPadding: 4
-                            wrapMode: Text.WordWrap
-                            text: i18n("Apps you open and files you use will appear here.")
-                            color: root.subtext
-                            font.family: "Inter"
-                            font.pixelSize: 12
-                        }
-                    }
-                }
-            }
-        }
-
-        // ---- Bottom strip: user, files, settings, lock, power ----
-        Rectangle {
-            id: strip
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            height: 68
-            color: Qt.rgba(0, 0, 0, 0.18)
-            Rectangle { anchors.top: parent.top; width: parent.width; height: 1; color: root.border }
-
-            RowLayout {
-                anchors.fill: parent
-                anchors.leftMargin: Kirigami.Units.gridUnit
-                anchors.rightMargin: Kirigami.Units.gridUnit
-                spacing: 6
-
-                Kirigami.Avatar {
-                    Layout.preferredWidth: 36
-                    Layout.preferredHeight: 36
-                    source: kuser.faceIconUrl.toString() !== "" ? kuser.faceIconUrl : "file:///usr/share/pixmaps/twilightos-avatar.png"
-                    name: kuser.fullName || kuser.loginName
-                }
-                Text {
-                    text: kuser.fullName || kuser.loginName
-                    color: root.textColor
-                    font.family: "Inter"
-                    font.pixelSize: 13
-                    font.weight: Font.Medium
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 6
-                    elide: Text.ElideRight
-                }
-                StripButton { iconName: "system-file-manager"; tip: i18n("Files"); onClicked: exec.run("dolphin") }
-                StripButton { iconName: "systemsettings"; tip: i18n("Settings"); onClicked: exec.run("twilightos-settings") }
-                StripButton { iconName: "system-lock-screen"; mask: true; tip: i18n("Lock"); onClicked: exec.run("loginctl lock-session") }
-                StripButton {
-                    iconName: "system-shutdown"; mask: true; tip: i18n("Power")
-                    onClicked: exec.run("dbus-send --session --type=method_call --dest=org.kde.LogoutPrompt /LogoutPrompt org.kde.LogoutPrompt.promptAll")
-                }
-            }
-        }
-
         function runResult(i) {
             if (root.results && i >= 0 && i < root.results.count) {
                 root.results.trigger(i, "", null);
                 root.expanded = false;
             }
         }
+
+        RowLayout {
+            anchors.fill: parent
+            spacing: 0
+
+            // ================= Now panel =================
+            Rectangle {
+                Layout.preferredWidth: Kirigami.Units.gridUnit * 16
+                Layout.fillHeight: true
+                radius: 16
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.30) }
+                    GradientStop { position: 0.55; color: Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.08) }
+                    GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.18) }
+                }
+                border.color: Qt.rgba(1, 1, 1, 0.06)
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: Kirigami.Units.gridUnit
+                    spacing: 10
+
+                    // clock
+                    Text {
+                        text: Qt.formatTime(root.now, Qt.locale().timeFormat(Locale.ShortFormat).replace(/:ss/, ""))
+                        color: root.textColor
+                        font.family: "Inter"
+                        font.pixelSize: 46
+                        font.weight: Font.Light
+                        font.features: { "tnum": 1 }
+                    }
+                    Text {
+                        Layout.topMargin: -6
+                        text: Qt.formatDate(root.now, "dddd, d MMMM")
+                        color: root.subtext
+                        font.family: "Inter"
+                        font.pixelSize: 13
+                    }
+
+                    // search
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 6
+                        Layout.preferredHeight: 42
+                        radius: 21
+                        color: Qt.rgba(0, 0, 0, 0.25)
+                        border.width: search.activeFocus ? 2 : 1
+                        border.color: search.activeFocus ? root.accent : Qt.rgba(1, 1, 1, 0.12)
+                        Kirigami.Icon {
+                            id: searchIcon
+                            anchors.left: parent.left
+                            anchors.leftMargin: 14
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 16; height: 16
+                            source: "system-search"
+                            color: search.activeFocus ? root.accent : root.subtext
+                            isMask: true
+                        }
+                        TextInput {
+                            id: search
+                            anchors.left: searchIcon.right
+                            anchors.leftMargin: 10
+                            anchors.right: parent.right
+                            anchors.rightMargin: 14
+                            anchors.verticalCenter: parent.verticalCenter
+                            color: root.textColor
+                            selectionColor: root.accent
+                            font.family: "Inter"
+                            font.pixelSize: 14
+                            clip: true
+                            onTextChanged: { root.query = text.trim(); menu.selected = 0; }
+                            Keys.onEscapePressed: text ? text = "" : root.expanded = false
+                            Keys.onDownPressed: menu.selected = Math.min(menu.selected + 1, (root.results ? root.results.count : 1) - 1)
+                            Keys.onUpPressed: menu.selected = Math.max(menu.selected - 1, 0)
+                            Keys.onReturnPressed: menu.runResult(menu.selected)
+                            Keys.onEnterPressed: menu.runResult(menu.selected)
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                visible: !search.text
+                                text: i18n("Search or calculate")
+                                color: root.dim
+                                font: search.font
+                            }
+                        }
+                    }
+
+                    // recent
+                    Text {
+                        Layout.topMargin: 8
+                        text: i18n("Recent")
+                        color: root.subtext
+                        font.family: "Inter"
+                        font.pixelSize: 11
+                        font.weight: Font.DemiBold
+                        font.letterSpacing: 0.8
+                        font.capitalization: Font.AllUppercase
+                    }
+                    ListView {
+                        id: recentList
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        clip: true
+                        interactive: false
+                        spacing: 2
+                        model: recentModel
+                        delegate: HoverCard {
+                            required property int index
+                            required property var model
+                            width: recentList.width
+                            height: 34
+                            radius: 8
+                            visible: index < 7
+                            onActivated: { recentModel.trigger(index, "", null); root.expanded = false; }
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 6
+                                spacing: 10
+                                Kirigami.Icon { source: model.decoration; Layout.preferredWidth: 20; Layout.preferredHeight: 20 }
+                                Text { text: model.display; color: root.textColor; font.family: "Inter"; font.pixelSize: 12; elide: Text.ElideRight; Layout.fillWidth: true }
+                            }
+                        }
+                        Text {
+                            visible: recentList.count === 0
+                            width: parent.width
+                            wrapMode: Text.WordWrap
+                            text: i18n("Apps and files you open show up here.")
+                            color: root.dim
+                            font.family: "Inter"
+                            font.pixelSize: 12
+                        }
+                    }
+
+                    // you + session
+                    Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: Qt.rgba(1, 1, 1, 0.1) }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+                        Kirigami.Avatar {
+                            Layout.preferredWidth: 32
+                            Layout.preferredHeight: 32
+                            source: kuser.faceIconUrl.toString() !== "" ? kuser.faceIconUrl : "file:///usr/share/pixmaps/twilightos-avatar.png"
+                            name: kuser.fullName || kuser.loginName
+                        }
+                        Text {
+                            text: kuser.fullName || kuser.loginName
+                            color: root.textColor
+                            font.family: "Inter"
+                            font.pixelSize: 12
+                            font.weight: Font.Medium
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+                        RoundButton { iconName: "system-lock-screen"; tip: i18n("Lock"); onClicked: exec.run("loginctl lock-session") }
+                        RoundButton { iconName: "configure"; tip: i18n("Settings"); onClicked: exec.run("twilightos-settings") }
+                        RoundButton { iconName: "system-shutdown"; tip: i18n("Power"); lit: menu.powerOpen; onClicked: menu.powerOpen = !menu.powerOpen }
+                    }
+                }
+            }
+
+            // ================= App shelf =================
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.leftMargin: Kirigami.Units.gridUnit
+                Layout.topMargin: 4
+                spacing: 12
+
+                // category tabs
+                ListView {
+                    id: tabs
+                    visible: root.query === ""
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 34
+                    orientation: ListView.Horizontal
+                    spacing: 6
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    // -1 Favourites, 0 All, 1.. categories (names from the model)
+                    model: {
+                        const out = [{ row: -1, name: i18n("Favourites") }, { row: 0, name: i18n("All") }];
+                        for (let r = 1; r < rootModel.count; r++) {
+                            const name = String(rootModel.labelForRow(r) || "").trim();
+                            if (name !== "") out.push({ row: r, name: name });   // skip separators / unnamed rows
+                        }
+                        return out;
+                    }
+                    delegate: Rectangle {
+                        required property var modelData
+                        readonly property bool current: root.shelf === modelData.row
+                        height: 34
+                        width: tabText.implicitWidth + 28
+                        radius: 17
+                        color: current ? root.accent : (tabArea.containsMouse ? root.hover : Qt.rgba(1, 1, 1, 0.05))
+                        border.color: current ? "transparent" : root.border
+                        Behavior on color { ColorAnimation { duration: 140 } }
+                        Text {
+                            id: tabText
+                            anchors.centerIn: parent
+                            text: modelData.name
+                            color: parent.current ? "#ffffff" : root.textColor
+                            font.family: "Inter"
+                            font.pixelSize: 12
+                            font.weight: parent.current ? Font.DemiBold : Font.Normal
+                        }
+                        MouseArea { id: tabArea; anchors.fill: parent; hoverEnabled: true; onClicked: root.shelf = modelData.row }
+                    }
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+
+                    // ---- shelf grid ----
+                    GridView {
+                        id: shelfGrid
+                        anchors.fill: parent
+                        visible: root.query === ""
+                        clip: true
+                        cellWidth: Math.floor(width / 5)
+                        cellHeight: 112
+                        model: root.shelfModel
+                        boundsBehavior: Flickable.StopAtBounds
+                        QQC2.ScrollBar.vertical: QQC2.ScrollBar {}
+                        delegate: Bubble {
+                            required property int index
+                            required property var model
+                            width: shelfGrid.cellWidth
+                            height: shelfGrid.cellHeight
+                            iconSource: model.decoration
+                            label: model.display
+                            pinned: root.shelf >= 0 && root.isPinned(model.favoriteId)
+                            onActivated: { root.shelfModel.trigger(index, "", null); root.expanded = false; }
+                            onContext: root.togglePin(model.favoriteId)
+                        }
+                        Text {
+                            anchors.centerIn: parent
+                            visible: shelfGrid.count === 0
+                            text: root.shelf < 0 ? i18n("Right-click any app in “All” to add it here.") : ""
+                            color: root.subtext
+                            font.family: "Inter"
+                        }
+                    }
+                    Text {
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        visible: root.query === ""
+                        text: root.shelf < 0 ? i18n("right-click to unpin") : i18n("right-click to pin")
+                        color: root.dim
+                        font.family: "Inter"
+                        font.pixelSize: 10
+                    }
+
+                    // ---- search results ----
+                    ListView {
+                        id: resultsView
+                        anchors.fill: parent
+                        visible: root.query !== ""
+                        model: root.results
+                        currentIndex: menu.selected
+                        spacing: 2
+                        clip: true
+                        boundsBehavior: Flickable.StopAtBounds
+                        header: Text {
+                            width: resultsView.width
+                            bottomPadding: 8
+                            text: i18n("Results for “%1”", root.query)
+                            color: root.subtext
+                            font.family: "Inter"
+                            font.pixelSize: 12
+                        }
+                        delegate: HoverCard {
+                            required property int index
+                            required property var model
+                            width: resultsView.width
+                            height: 52
+                            active: index === menu.selected
+                            onActivated: { root.results.trigger(index, "", null); root.expanded = false; }
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 12
+                                anchors.rightMargin: 12
+                                spacing: 14
+                                Rectangle {
+                                    Layout.preferredWidth: 36
+                                    Layout.preferredHeight: 36
+                                    radius: 10
+                                    color: Qt.rgba(1, 1, 1, 0.06)
+                                    Kirigami.Icon { anchors.centerIn: parent; source: model.decoration; width: 26; height: 26 }
+                                }
+                                ColumnLayout {
+                                    spacing: 0
+                                    Layout.fillWidth: true
+                                    Text { text: model.display; color: root.textColor; font.family: "Inter"; font.pixelSize: 13; font.weight: Font.Medium; elide: Text.ElideRight; Layout.fillWidth: true }
+                                    Text { text: model.description || ""; visible: text !== ""; color: root.subtext; font.family: "Inter"; font.pixelSize: 11; elide: Text.ElideRight; Layout.fillWidth: true }
+                                }
+                                Rectangle {
+                                    visible: index === menu.selected
+                                    Layout.preferredWidth: enterText.implicitWidth + 14
+                                    Layout.preferredHeight: 22
+                                    radius: 6
+                                    color: Qt.rgba(1, 1, 1, 0.08)
+                                    Text { id: enterText; anchors.centerIn: parent; text: i18n("Enter"); color: root.subtext; font.family: "Inter"; font.pixelSize: 10 }
+                                }
+                            }
+                        }
+                        Text {
+                            anchors.centerIn: parent
+                            visible: !runnerModel.querying && (!root.results || root.results.count === 0)
+                            text: i18n("Nothing found")
+                            color: root.subtext
+                            font.family: "Inter"
+                        }
+                    }
+                }
+            }
+        }
+
+        // ================= Power flyout =================
+        MouseArea {
+            anchors.fill: parent
+            visible: menu.powerOpen
+            onClicked: menu.powerOpen = false
+        }
+        Rectangle {
+            visible: menu.powerOpen
+            x: Kirigami.Units.gridUnit * 16 - width - 8
+            y: parent.height - height - 56
+            width: 190
+            height: powerCol.implicitHeight + 12
+            radius: 12
+            color: "#141d38"
+            border.color: Qt.rgba(1, 1, 1, 0.12)
+            ColumnLayout {
+                id: powerCol
+                anchors.fill: parent
+                anchors.margins: 6
+                spacing: 2
+                Repeater {
+                    model: [
+                        { icon: "system-suspend", label: i18n("Sleep"), run: () => exec.run("systemctl suspend") },
+                        { icon: "system-reboot", label: i18n("Restart"), run: () => root.logoutPrompt("promptReboot") },
+                        { icon: "system-shutdown", label: i18n("Shut down"), run: () => root.logoutPrompt("promptShutDown") },
+                        { icon: "system-log-out", label: i18n("Sign out"), run: () => root.logoutPrompt("promptLogout") }
+                    ]
+                    delegate: HoverCard {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 38
+                        onActivated: { menu.powerOpen = false; modelData.run(); }
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 12
+                            spacing: 12
+                            Kirigami.Icon { source: modelData.icon; isMask: true; color: root.textColor; Layout.preferredWidth: 18; Layout.preferredHeight: 18 }
+                            Text { text: modelData.label; color: root.textColor; font.family: "Inter"; font.pixelSize: 13; Layout.fillWidth: true }
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    // ---------- Small components ----------
-    // Generic hover tile used by every list
-    component Tile: Rectangle {
-        id: t
+    // ---------- Components ----------
+    component HoverCard: Rectangle {
+        id: hc
         property bool active: false
         signal activated()
-        signal contextRequested(real x, real y)
+        signal context()
         radius: 12
-        color: area.pressed ? Qt.rgba(1, 1, 1, 0.14) : (area.containsMouse || active ? root.hover : "transparent")
+        color: hcArea.pressed ? Qt.rgba(1, 1, 1, 0.14) : (hcArea.containsMouse || active ? root.hover : "transparent")
         Behavior on color { ColorAnimation { duration: 120 } }
         MouseArea {
-            id: area
+            id: hcArea
             anchors.fill: parent
             hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onClicked: (m) => m.button === Qt.RightButton ? t.contextRequested(m.x, m.y) : t.activated()
+            onClicked: (m) => m.button === Qt.RightButton ? hc.context() : hc.activated()
         }
     }
 
-    component Pill: Rectangle {
-        id: pill
+    // An app "bubble": the icon floats in a soft disc that lights up in the accent colour.
+    component Bubble: Item {
+        id: bb
+        property var iconSource
         property string label
-        property string iconName
-        property bool iconFirst: false
-        signal clicked()
-        implicitWidth: pillRow.implicitWidth + 22
-        implicitHeight: 28
-        radius: 14
-        color: pillArea.containsMouse ? root.hover : root.card
-        RowLayout {
-            id: pillRow
-            anchors.centerIn: parent
-            spacing: 4
-            layoutDirection: pill.iconFirst ? Qt.RightToLeft : Qt.LeftToRight
-            Text { text: pill.label; color: root.textColor; font.family: "Inter"; font.pixelSize: 12 }
-            Kirigami.Icon { source: pill.iconName; implicitWidth: 14; implicitHeight: 14; color: root.textColor; isMask: true }
+        property bool pinned: false
+        signal activated()
+        signal context()
+        readonly property bool hot: bbArea.containsMouse
+        Rectangle {
+            id: disc
+            width: 68; height: 68
+            radius: 34
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: 6
+            color: bb.hot ? Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.22) : Qt.rgba(1, 1, 1, 0.045)
+            border.width: bb.hot ? 2 : 1
+            border.color: bb.hot ? root.accent : Qt.rgba(1, 1, 1, 0.07)
+            scale: bbArea.pressed ? 0.93 : (bb.hot ? 1.06 : 1)
+            Behavior on color { ColorAnimation { duration: 140 } }
+            Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+            Kirigami.Icon { anchors.centerIn: parent; source: bb.iconSource; width: 40; height: 40 }
+            Rectangle {
+                visible: bb.pinned
+                width: 10; height: 10; radius: 5
+                color: root.accent
+                border.width: 2
+                border.color: "#0d1428"
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: 2
+            }
         }
-        MouseArea { id: pillArea; anchors.fill: parent; hoverEnabled: true; onClicked: pill.clicked() }
+        Text {
+            anchors.top: disc.bottom
+            anchors.topMargin: 8
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width - 8
+            horizontalAlignment: Text.AlignHCenter
+            text: bb.label
+            color: bb.hot ? root.textColor : root.subtext
+            font.family: "Inter"
+            font.pixelSize: 12
+            elide: Text.ElideRight
+        }
+        MouseArea {
+            id: bbArea
+            anchors.fill: parent
+            hoverEnabled: true
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            cursorShape: Qt.PointingHandCursor
+            onClicked: (m) => m.button === Qt.RightButton ? bb.context() : bb.activated()
+        }
     }
 
-    component StripButton: Rectangle {
-        id: sb
+    component RoundButton: Rectangle {
+        id: rb
         property string iconName
         property string tip
-        property bool mask: false
+        property bool lit: false
         signal clicked()
-        Layout.preferredWidth: 40
-        Layout.preferredHeight: 40
-        radius: 20
-        color: sbArea.containsMouse ? root.hover : "transparent"
-        Kirigami.Icon {
-            anchors.centerIn: parent
-            width: sb.mask ? 20 : 24
-            height: width
-            source: sb.iconName
-            isMask: sb.mask
-            color: root.textColor
-        }
-        MouseArea { id: sbArea; anchors.fill: parent; hoverEnabled: true; onClicked: sb.clicked() }
-        QQC2.ToolTip.visible: sbArea.containsMouse
-        QQC2.ToolTip.text: sb.tip
-        QQC2.ToolTip.delay: 600
+        Layout.preferredWidth: 32
+        Layout.preferredHeight: 32
+        radius: 16
+        color: rb.lit ? Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.3) : (rbArea.containsMouse ? root.hover : "transparent")
+        Kirigami.Icon { anchors.centerIn: parent; width: 16; height: 16; source: rb.iconName; isMask: true; color: root.textColor }
+        MouseArea { id: rbArea; anchors.fill: parent; hoverEnabled: true; onClicked: rb.clicked() }
+        QQC2.ToolTip.visible: rbArea.containsMouse
+        QQC2.ToolTip.text: rb.tip
+        QQC2.ToolTip.delay: 500
     }
 }

@@ -6,6 +6,17 @@ cmd=$1
 
 strip_ansi() { sed 's/\x1b\[[0-9;]*m//g'; }
 
+# bluetoothctl waits forever when there is no adapter, so check first and time-box it
+has_bt() { ls /sys/class/bluetooth 2>/dev/null | grep -q '^hci'; }
+bt_state() {
+    has_bt || { echo none; return; }
+    case "$(timeout 2 bluetoothctl show 2>/dev/null)" in
+        *"Powered: yes"*) echo on ;;
+        *Powered*)        echo off ;;
+        *)                echo none ;;
+    esac
+}
+
 case "$cmd" in
 sysinfo)
     echo "product=TwilightOS"
@@ -35,16 +46,9 @@ airplane-set)
     if [ "$1" = on ]; then nmcli radio all off; rfkill block bluetooth 2>/dev/null
     else nmcli radio all on; rfkill unblock bluetooth 2>/dev/null; fi
     ;;
-bt-status)
-    s=$(bluetoothctl show 2>/dev/null)
-    case "$s" in
-        *"Powered: yes"*) echo "bt=on" ;;
-        *Powered*)        echo "bt=off" ;;
-        *)                echo "bt=none" ;;
-    esac
-    ;;
-bt-set)          bluetoothctl power "$1" >/dev/null ;;
-bt-devices)      bluetoothctl devices Paired 2>/dev/null | cut -d' ' -f3- ;;
+bt-status)       echo "bt=$(bt_state)" ;;
+bt-set)          has_bt && timeout 3 bluetoothctl power "$1" >/dev/null ;;
+bt-devices)      has_bt && timeout 2 bluetoothctl devices Paired 2>/dev/null | cut -d' ' -f3- ;;
 vol-get)
     v=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null)
     echo "vol=$(echo "$v" | awk '{printf "%d", $2*100 + 0.5}')"
@@ -110,6 +114,102 @@ power-get)
     ;;
 power-set)       powerprofilesctl set "$1" ;;
 open)            setsid -f "$@" >/dev/null 2>&1 ;;
+
+# ---------------- Quick Settings ----------------
+qs-status)
+    # everything Quick Settings shows, in one call
+    echo "wifi=$(nmcli radio wifi 2>/dev/null)"
+    c=$(nmcli -t -f TYPE,STATE,CONNECTION dev 2>/dev/null | grep ':connected:' | head -n1)
+    echo "type=$(echo "$c" | cut -d: -f1)"
+    echo "conn=$(echo "$c" | cut -d: -f3-)"
+    echo "signal=$(nmcli -t -f IN-USE,SIGNAL dev wifi list --rescan no 2>/dev/null | awk -F: '$1=="*"{print $2; exit}')"
+    echo "bt=$(bt_state)"
+    v=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null)
+    echo "vol=$(echo "$v" | awk '{printf "%d", $2*100 + 0.5}')"
+    case "$v" in *MUTED*) echo "muted=yes" ;; *) echo "muted=no" ;; esac
+    echo "night=$(kreadconfig6 --file kwinrc --group NightColor --key Active --default false)"
+    case "$(kreadconfig6 --file plasmanotifyrc --group DoNotDisturb --key Until)" in 2099*) echo "dnd=on" ;; *) echo "dnd=off" ;; esac
+    echo "scheme=$(kreadconfig6 --file kdeglobals --group General --key ColorScheme --default Twilight)"
+    command -v brightnessctl >/dev/null && [ -n "$(ls /sys/class/backlight 2>/dev/null)" ] \
+        && echo "bright=$(brightnessctl -m 2>/dev/null | cut -d, -f4 | tr -d '%')"
+    b=$(ls /sys/class/power_supply 2>/dev/null | grep -m1 '^BAT')
+    if [ -n "$b" ]; then
+        echo "battery=$(cat /sys/class/power_supply/$b/capacity)"
+        echo "charging=$(cat /sys/class/power_supply/$b/status)"
+    fi
+    ;;
+dnd-set)
+    # "until 2099" = on until switched off; Plasma watches this file
+    if [ "$1" = on ]; then
+        kwriteconfig6 --file plasmanotifyrc --group DoNotDisturb --key Until "2099,1,1,0,0,0"
+    else
+        kwriteconfig6 --file plasmanotifyrc --group DoNotDisturb --key Until --delete
+    fi
+    ;;
+bright-set)      brightnessctl -q set "$1%" ;;
+dark-set)
+    if [ "$1" = on ]; then plasma-apply-colorscheme Twilight >/dev/null; else plasma-apply-colorscheme BreezeLight >/dev/null; fi
+    ;;
+mic-get)
+    v=$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null)
+    echo "mic=$(echo "$v" | awk '{printf "%d", $2*100 + 0.5}')"
+    case "$v" in *MUTED*) echo "micmuted=yes" ;; *) echo "micmuted=no" ;; esac
+    ;;
+mic-set)         wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SOURCE@ "$1%" ;;
+
+# ---------------- Privacy & taskbar ----------------
+privacy-get)
+    echo "locktimeout=$(kreadconfig6 --file kscreenlockerrc --group Daemon --key Timeout --default 5)"
+    echo "autolock=$(kreadconfig6 --file kscreenlockerrc --group Daemon --key Autolock --default true)"
+    echo "indexing=$(kreadconfig6 --file baloofilerc --group 'Basic Settings' --key Indexing-Enabled --default false)"
+    echo "recent=$(kreadconfig6 --file kactivitymanagerd-pluginsrc --group Plugin-org.kde.ActivityManager.Resources.Scoring --key what-to-remember --default 0)"
+    ;;
+locktimeout-set)
+    if [ "$1" = 0 ]; then
+        kwriteconfig6 --file kscreenlockerrc --group Daemon --key Autolock false
+    else
+        kwriteconfig6 --file kscreenlockerrc --group Daemon --key Autolock true
+        kwriteconfig6 --file kscreenlockerrc --group Daemon --key Timeout "$1"
+    fi
+    ;;
+indexing-set)
+    if [ "$1" = on ]; then balooctl6 enable >/dev/null 2>&1; else balooctl6 disable >/dev/null 2>&1; fi
+    kwriteconfig6 --file baloofilerc --group 'Basic Settings' --key Indexing-Enabled "$([ "$1" = on ] && echo true || echo false)"
+    ;;
+recent-set)
+    # 0 = remember everything, 2 = remember nothing
+    kwriteconfig6 --file kactivitymanagerd-pluginsrc --group Plugin-org.kde.ActivityManager.Resources.Scoring --key what-to-remember "$([ "$1" = on ] && echo 0 || echo 2)"
+    ;;
+recent-clear)
+    rm -f "$HOME/.local/share/recently-used.xbel" "$HOME"/.local/share/RecentDocuments/*.desktop 2>/dev/null
+    qdbus6 org.kde.ActivityManager /ActivityManager/Resources/Scoring DeleteRecentStats "" 0 everything >/dev/null 2>&1 || true
+    ;;
+storage-get)
+    df -h / | awk 'NR==2{print "root_used="$3; print "root_size="$2; print "root_pct="$5}'
+    echo "cache=$(du -sh "$HOME/.cache" 2>/dev/null | cut -f1)"
+    echo "trash=$(du -sh "$HOME/.local/share/Trash" 2>/dev/null | cut -f1)"
+    ;;
+storage-clean)
+    rm -rf "$HOME/.cache/thumbnails" "$HOME"/.local/share/Trash/files/* "$HOME"/.local/share/Trash/info/* 2>/dev/null
+    ;;
+panel)
+    # TwilightOS layout tweaks, applied live through Plasma's scripting interface.
+    #   panel top-floating on|off      panel dock dodge|autohide|always
+    case "$1:$2" in
+        top-floating:on)  js='panels().forEach(function(p){ if (p.location == "top") p.floating = true; })' ;;
+        top-floating:off) js='panels().forEach(function(p){ if (p.location == "top") p.floating = false; })' ;;
+        dock:dodge)       js='panels().forEach(function(p){ if (p.location == "bottom") p.hiding = "dodgewindows"; })' ;;
+        dock:autohide)    js='panels().forEach(function(p){ if (p.location == "bottom") p.hiding = "autohide"; })' ;;
+        dock:always)      js='panels().forEach(function(p){ if (p.location == "bottom") p.hiding = "none"; })' ;;
+        *) echo "unknown panel option" >&2; exit 2 ;;
+    esac
+    dbus-send --session --type=method_call --dest=org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "string:$js"
+    ;;
+panel-get)
+    dbus-send --session --print-reply --type=method_call --dest=org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \
+        'string:var o=[]; panels().forEach(function(p){ if (p.location=="top") o.push("topfloating="+p.floating); if (p.location=="bottom") o.push("dock="+p.hiding); }); print(o.join(";"));' \
+        2>/dev/null | sed -n 's/^ *string "\(.*\)"$/\1/p' | tr ';' '\n'
+    ;;
 *)
     echo "usage: twilightos-settings-helper <command> [args]" >&2
     exit 2

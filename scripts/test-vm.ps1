@@ -17,6 +17,8 @@ param(
     # so the program lives in Program Files; VMs, disks and settings stay on D:.
     [string]$VBoxManage = 'C:\Program Files\Oracle\VirtualBox\VBoxManage.exe',
     [string]$BaseFolder = 'D:\VirtualBox\VMs',
+    # 3D acceleration: KWin and Plasma render on the host GPU instead of the CPU (llvmpipe).
+    [switch]$No3D,
     [switch]$NoStart
 )
 $ErrorActionPreference = 'Stop'
@@ -62,7 +64,7 @@ Write-Host "Creating $VmName with $Iso"
 Invoke-VBox createvm --name $VmName --ostype ArchLinux_64 --basefolder $BaseFolder --register
 Invoke-VBox modifyvm $VmName `
     --firmware efi --cpus $Cpus --memory $MemoryMB --vram $VramMB `
-    --graphicscontroller vmsvga --accelerate-3d off `
+    --graphicscontroller vmsvga --accelerate-3d $(if ($No3D) { 'off' } else { 'on' }) `
     --mouse usbtablet --nic1 nat --rtc-use-utc on `
     --audio-enabled on --audio-out on --clipboard-mode bidirectional `
     --boot1 dvd --boot2 disk --boot3 none --boot4 none `

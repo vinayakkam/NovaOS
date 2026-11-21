@@ -23,6 +23,11 @@ QQC2.ApplicationWindow {
     minimumWidth: 860
     minimumHeight: 560
     visible: true
+
+    // Wayland app id = reversed organisation domain + executable name ("qml" for both
+    // TwilightOS apps), so each app sets its own domain before its window is shown:
+    // org.twilightos.settings.qml
+    readonly property bool appIdentity: { Qt.application.domain = "settings.twilightos.org"; Qt.application.name = "TwilightOS Settings"; return true; }
     title: "Settings"
     color: base
 
@@ -42,7 +47,7 @@ QQC2.ApplicationWindow {
 
     property string page: {
         const a = Qt.application.arguments;
-        const known = ["home", "system", "bluetooth", "network", "personalisation", "apps", "accounts", "time", "update"];
+        const known = ["home", "system", "bluetooth", "network", "personalisation", "taskbar", "apps", "accounts", "privacy", "time", "update"];
         for (let i = 0; i < a.length; i++) if (known.includes(a[i])) return a[i];
         return "home";
     }
@@ -62,6 +67,11 @@ QQC2.ApplicationWindow {
     property var wallpapers: []
     property var time: ({})
     property var power: ({})
+    property var qs: ({})        // dnd etc. (qs-status)
+    property var mic: ({})
+    property var privacy: ({})
+    property var storage: ({})
+    property var panel: ({})
 
     KCoreAddons.KUser { id: kuser }
 
@@ -116,6 +126,11 @@ QQC2.ApplicationWindow {
         if (which === "all" || which === "wall") sh.run("wallpapers", t => app.wallpapers = t ? t.split("\n") : []);
         if (which === "all" || which === "time") sh.run("time-get", t => app.time = kv(t));
         if (which === "all" || which === "power") sh.run("power-get", t => app.power = kv(t));
+        if (which === "all" || which === "qs") sh.run("qs-status", t => app.qs = kv(t));
+        if (which === "all" || which === "sound") sh.run("mic-get", t => app.mic = kv(t));
+        if (which === "all" || which === "privacy") sh.run("privacy-get", t => app.privacy = kv(t));
+        if (which === "all" || which === "storage") sh.run("storage-get", t => app.storage = kv(t));
+        if (which === "all" || which === "panel") sh.run("panel-get", t => app.panel = kv(t));
     }
     Component.onCompleted: refresh("all")
     Timer { interval: 8000; running: app.active; repeat: true; onTriggered: { refresh("net"); refresh("bt"); } }
@@ -127,8 +142,10 @@ QQC2.ApplicationWindow {
         { id: "bluetooth",       title: "Bluetooth & devices",   icon: "preferences-system-bluetooth" },
         { id: "network",         title: "Network & internet",    icon: "network-wireless" },
         { id: "personalisation", title: "Personalisation",       icon: "preferences-desktop-theme-global" },
+        { id: "taskbar",         title: "Taskbar",               icon: "preferences-desktop-taskbar" },
         { id: "apps",            title: "Apps",                  icon: "view-app-grid" },
         { id: "accounts",        title: "Accounts",              icon: "system-switch-user" },
+        { id: "privacy",         title: "Privacy & security",    icon: "security-high" },
         { id: "time",            title: "Time & language",       icon: "preferences-system-time" },
         { id: "update",          title: "Update",                icon: "system-software-update" }
     ]
@@ -174,7 +191,22 @@ QQC2.ApplicationWindow {
             anchors.leftMargin: 18
             anchors.rightMargin: 18
             spacing: 16
-            Kirigami.Icon { source: row.icon; visible: row.icon !== ""; Layout.preferredWidth: 22; Layout.preferredHeight: 22 }
+            // icon chip: TwilightOS line icon in the accent colour on a soft accent tile
+            Rectangle {
+                visible: row.icon !== ""
+                Layout.preferredWidth: 36
+                Layout.preferredHeight: 36
+                radius: 10
+                color: Qt.rgba(app.accent.r, app.accent.g, app.accent.b, 0.16)
+                Kirigami.Icon {
+                    anchors.centerIn: parent
+                    width: 20; height: 20
+                    source: row.icon + "-symbolic"
+                    fallback: row.icon
+                    isMask: true
+                    color: app.accent
+                }
+            }
             ColumnLayout {
                 id: col
                 spacing: 2
@@ -187,26 +219,30 @@ QQC2.ApplicationWindow {
         }
     }
 
+    // "on" stays bound to the real state; "shown" flips instantly on click and
+    // re-syncs whenever the real state is refreshed.
     component Toggle: RowLayout {
         id: tg
         property bool on: false
+        property bool shown: on
+        onOnChanged: shown = on
         signal toggled(bool on)
         spacing: 10
-        Sub { text: tg.on ? "On" : "Off" }
+        Sub { text: tg.shown ? "On" : "Off" }
         Rectangle {
             implicitWidth: 42; implicitHeight: 22; radius: 11
-            color: tg.on ? app.accent : "transparent"
-            border.color: tg.on ? app.accent : app.subtext
+            color: tg.shown ? app.accent : "transparent"
+            border.color: tg.shown ? app.accent : app.subtext
             border.width: 1.5
             Behavior on color { ColorAnimation { duration: 140 } }
             Rectangle {
                 width: 14; height: 14; radius: 7
                 anchors.verticalCenter: parent.verticalCenter
-                x: tg.on ? parent.width - width - 4 : 4
-                color: tg.on ? "#ffffff" : app.subtext
+                x: tg.shown ? parent.width - width - 4 : 4
+                color: tg.shown ? "#ffffff" : app.subtext
                 Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
             }
-            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { tg.on = !tg.on; tg.toggled(tg.on); } }
+            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { tg.shown = !tg.shown; tg.toggled(tg.shown); } }
         }
     }
 
@@ -346,7 +382,13 @@ QQC2.ApplicationWindow {
                             anchors.fill: parent
                             anchors.leftMargin: 14
                             spacing: 14
-                            Kirigami.Icon { source: modelData.icon; Layout.preferredWidth: 18; Layout.preferredHeight: 18 }
+                            Kirigami.Icon {
+                                source: modelData.icon + "-symbolic"
+                                fallback: modelData.icon
+                                isMask: true
+                                color: parent.parent.current ? app.accent : app.textColor
+                                Layout.preferredWidth: 18; Layout.preferredHeight: 18
+                            }
                             Label { text: modelData.title; font.pixelSize: 13; Layout.fillWidth: true }
                         }
                         MouseArea { id: navArea; anchors.fill: parent; hoverEnabled: true; onClicked: app.page = modelData.id }
@@ -465,7 +507,52 @@ QQC2.ApplicationWindow {
                         Label { text: app.volume + "%"; Layout.preferredWidth: 42; font.pixelSize: 13 }
                         Button { text: app.muted ? "Unmute" : "Mute"; onClicked: sh.run("mute-toggle", () => app.refresh("sound")) }
                     }
-                    Setting { icon: "audio-card"; title: "More sound settings"; subtitle: "Devices, input, per-app volume"; chevron: true; onClicked: app.kcm("kcm_pulseaudio") }
+                    Setting {
+                        icon: app.mic.micmuted === "yes" ? "microphone-sensitivity-muted" : "microphone-sensitivity-high"
+                        title: "Microphone"; subtitle: "Input volume"
+                        QQC2.Slider {
+                            from: 0; to: 100; stepSize: 1
+                            value: +app.mic.mic || 0
+                            Layout.preferredWidth: 220
+                            onMoved: sh.run("mic-set " + Math.round(value))
+                        }
+                        Label { text: (+app.mic.mic || 0) + "%"; Layout.preferredWidth: 42; font.pixelSize: 13 }
+                    }
+                    Setting { icon: "audio-card"; title: "More sound settings"; subtitle: "Devices, per-app volume"; chevron: true; onClicked: app.kcm("kcm_pulseaudio") }
+
+                    Heading { text: "Notifications" }
+                    Setting {
+                        icon: app.qs.dnd === "on" ? "notifications-disabled" : "preferences-desktop-notification-bell"
+                        title: "Do not disturb"; subtitle: "Silence pop-up notifications (they still go to the bell)"
+                        Toggle { on: app.qs.dnd === "on"; onToggled: (v) => sh.run("dnd-set " + (v ? "on" : "off"), () => app.refresh("qs")) }
+                    }
+                    Setting { icon: "preferences-desktop-notification-bell"; title: "Notification settings"; subtitle: "Which apps can notify, sounds, pop-up position"; chevron: true; onClicked: app.kcm("kcm_notifications") }
+
+                    Heading { text: "Storage" }
+                    Setting {
+                        icon: "drive-harddisk"
+                        title: "System drive"
+                        subtitle: (app.storage.root_used || "?") + " used of " + (app.storage.root_size || "?")
+                        Rectangle {
+                            Layout.preferredWidth: 200
+                            Layout.preferredHeight: 8
+                            radius: 4
+                            color: Qt.rgba(1, 1, 1, 0.1)
+                            Rectangle {
+                                height: parent.height
+                                radius: 4
+                                width: parent.width * Math.min(1, (parseInt(app.storage.root_pct) || 0) / 100)
+                                color: (parseInt(app.storage.root_pct) || 0) > 85 ? "#ff6b81" : app.accent
+                            }
+                        }
+                        Label { text: app.storage.root_pct || ""; font.pixelSize: 13; Layout.preferredWidth: 42 }
+                    }
+                    Setting {
+                        icon: "edit-clear-history"
+                        title: "Clean up"
+                        subtitle: "Thumbnail cache " + (app.storage.cache || "0") + " · Trash " + (app.storage.trash || "0")
+                        Button { text: "Clean now"; onClicked: sh.run("storage-clean", () => app.refresh("storage")) }
+                    }
 
                     Heading { text: "Power" }
                     Setting {
@@ -483,7 +570,6 @@ QQC2.ApplicationWindow {
                         }
                     }
                     Setting { icon: "preferences-system-power-management"; title: "Screen and sleep"; subtitle: "When to turn off the screen and sleep"; chevron: true; onClicked: app.kcm("kcm_powerdevilprofilesconfig") }
-                    Setting { icon: "preferences-desktop-notification-bell"; title: "Notifications"; subtitle: "Alerts from apps and system, Do not disturb"; chevron: true; onClicked: app.kcm("kcm_notifications") }
 
                     Heading { text: "About" }
                     Rectangle {
@@ -642,7 +728,7 @@ QQC2.ApplicationWindow {
                             }
                         }
                     }
-                    Setting { icon: "folder-pictures"; title: "Browse for a picture"; subtitle: "Or right-click the desktop › Configure Desktop"; chevron: true; onClicked: app.open("dolphin " + app.q((kuser.homeDir || "") + "/Pictures")) }
+                    Setting { icon: "preferences-desktop-wallpaper"; title: "Browse for a picture"; subtitle: "Or right-click the desktop › Configure Desktop"; chevron: true; onClicked: app.open("dolphin \"$HOME/Pictures\"") }
 
                     Heading { text: "More" }
                     Setting { icon: "preferences-desktop-font"; title: "Fonts"; chevron: true; onClicked: app.kcm("kcm_fonts") }
@@ -651,9 +737,39 @@ QQC2.ApplicationWindow {
                     Setting { icon: "preferences-system-windows"; title: "Window behaviour"; subtitle: "Snapping, focus, title bar buttons"; chevron: true; onClicked: app.kcm("kcm_kwinoptions") }
                 }
 
+                // ===== Taskbar =====
+                Page {
+                    Heading { text: "Top bar" }
+                    Setting {
+                        icon: "preferences-desktop-panel"
+                        title: "Floating top bar"
+                        subtitle: "Float with a small gap over the desktop; snaps to the edge when a window is maximised"
+                        Toggle { on: app.panel.topfloating === "true"; onToggled: (v) => sh.run("panel top-floating " + (v ? "on" : "off"), () => app.refresh("panel")) }
+                    }
+                    Heading { text: "Dock" }
+                    Setting {
+                        icon: "preferences-desktop-taskbar"
+                        title: "Dock behaviour"
+                        subtitle: "How the dock reacts to windows"
+                        Repeater {
+                            model: [["dodge", "dodgewindows", "Move out of the way"], ["autohide", "autohide", "Auto-hide"], ["always", "none", "Always show"]]
+                            delegate: Choice {
+                                required property var modelData
+                                text: modelData[2]
+                                selected: app.panel.dock === modelData[1]
+                                onClicked: sh.run("panel dock " + modelData[0], () => app.refresh("panel"))
+                            }
+                        }
+                    }
+                    Setting { icon: "view-app-grid"; title: "Pinned apps"; subtitle: "Drag apps onto the dock to pin them; right-click a dock icon to unpin"; chevron: false }
+                    Heading { text: "Search" }
+                    Setting { icon: "system-search"; title: "Search shortcut"; subtitle: "Meta+Space or start typing on the desktop. Choose what search finds"; chevron: true; onClicked: app.kcm("kcm_plasmasearch") }
+                    Setting { icon: "preferences-desktop-effects"; title: "Hot corners and gestures"; subtitle: "Top-left corner opens Overview"; chevron: true; onClicked: app.kcm("kcm_kwinscreenedges") }
+                }
+
                 // ===== Apps =====
                 Page {
-                    Setting { icon: "org.kde.discover"; title: "Installed apps"; subtitle: "Install, update and remove apps"; chevron: true; onClicked: app.open("plasma-discover --mode installed") }
+                    Setting { icon: "system-software-install"; title: "Installed apps"; subtitle: "Install, update and remove apps"; chevron: true; onClicked: app.open("plasma-discover --mode installed") }
                     Setting { icon: "preferences-desktop-default-applications"; title: "Default apps"; subtitle: "Browser, email, file manager, terminal"; chevron: true; onClicked: app.kcm("kcm_componentchooser") }
                     Setting { icon: "system-run"; title: "Startup"; subtitle: "Apps that start when you sign in"; chevron: true; onClicked: app.kcm("kcm_autostart") }
                     Setting { icon: "application-x-ms-dos-executable"; title: "Windows apps"; subtitle: "Configure Wine for .exe and .msi programs"; chevron: true; onClicked: app.open("winecfg") }
@@ -683,6 +799,50 @@ QQC2.ApplicationWindow {
                     Setting { icon: "user-identity"; title: "Your info"; subtitle: "Name, picture, password"; chevron: true; onClicked: app.kcm("kcm_users") }
                     Setting { icon: "system-lock-screen"; title: "Sign-in options"; subtitle: "Lock screen, automatic locking"; chevron: true; onClicked: app.kcm("kcm_screenlocker") }
                     Setting { icon: "system-users"; title: "Other users"; subtitle: "Add people who use this PC"; chevron: true; onClicked: app.kcm("kcm_users") }
+                }
+
+                // ===== Privacy & security =====
+                Page {
+                    Heading { text: "Screen lock" }
+                    Setting {
+                        icon: "system-lock-screen"
+                        title: "Lock automatically"
+                        subtitle: "After this many minutes without activity"
+                        Repeater {
+                            model: [[0, "Never"], [5, "5 min"], [10, "10 min"], [30, "30 min"]]
+                            delegate: Choice {
+                                required property var modelData
+                                text: modelData[1]
+                                selected: modelData[0] === 0 ? app.privacy.autolock === "false"
+                                                             : (app.privacy.autolock !== "false" && +app.privacy.locktimeout === modelData[0])
+                                onClicked: sh.run("locktimeout-set " + modelData[0], () => app.refresh("privacy"))
+                            }
+                        }
+                    }
+                    Heading { text: "Activity" }
+                    Setting {
+                        icon: "preferences-system-time"
+                        title: "Remember recent files and apps"
+                        subtitle: "Used by Start › Jump back in"
+                        Toggle { on: app.privacy.recent !== "2"; onToggled: (v) => sh.run("recent-set " + (v ? "on" : "off"), () => app.refresh("privacy")) }
+                    }
+                    Setting {
+                        icon: "edit-clear-history"
+                        title: "Clear activity history"
+                        subtitle: "Forget recent files and app usage"
+                        Button { text: "Clear"; onClicked: sh.run("recent-clear") }
+                    }
+                    Heading { text: "Search" }
+                    Setting {
+                        icon: "system-search"
+                        title: "Index file contents"
+                        subtitle: "Faster file search, but uses memory and disk in the background"
+                        Toggle { on: app.privacy.indexing === "true"; onToggled: (v) => sh.run("indexing-set " + (v ? "on" : "off"), () => app.refresh("privacy")) }
+                    }
+                    Heading { text: "Security" }
+                    Setting { icon: "network-vpn"; title: "Firewall"; subtitle: "Allow or block network connections"; chevron: true; onClicked: app.kcm("kcm_firewall") }
+                    Setting { icon: "security-high"; title: "Passwords and keys"; subtitle: "Saved passwords (KWallet)"; chevron: true; onClicked: app.kcm("kcm_kwallet5") }
+                    Setting { icon: "preferences-system-windows"; title: "App permissions"; subtitle: "Flatpak app access to files, devices and network"; chevron: true; onClicked: app.kcm("kcm_flatpak") }
                 }
 
                 // ===== Time & language =====

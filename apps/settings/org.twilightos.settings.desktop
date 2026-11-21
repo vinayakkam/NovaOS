@@ -7,5 +7,5 @@ Exec=twilightos-settings
 Icon=org.twilightos.settings
 Categories=Settings;System;
 Keywords=settings;preferences;control panel;wifi;bluetooth;display;theme;wallpaper;
-StartupWMClass=qml
+StartupWMClass=org.twilightos.settings.qml
 StartupNotify=true

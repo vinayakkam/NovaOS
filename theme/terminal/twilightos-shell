@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # TwilightOS terminal: greet with the TwilightOS system summary, then hand over to the shell.
 if command -v fastfetch >/dev/null 2>&1; then
     fastfetch --config /usr/share/twilightos/terminal/fastfetch.jsonc 2>/dev/null

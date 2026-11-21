@@ -1,10 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <style id="current-color-scheme">.ColorScheme-Highlight{color:#f2683a;}.ColorScheme-Text{color:#f1eee6;}</style>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#1d2a4d"/><stop offset="1" stop-color="#0d1428"/>
     </linearGradient>
-    <linearGradient id="fg" gradientUnits="userSpaceOnUse" x1="12" y1="12" x2="36" y2="36">
-      <stop offset="0" stop-color="#5fd39b"/><stop offset="1" stop-color="#5eb7d0"/>
+    <linearGradient id="sheen" gradientUnits="userSpaceOnUse" x1="12" y1="12" x2="36" y2="36">
+      <stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="hl" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/>
@@ -14,7 +15,10 @@
   <rect x="3" y="3" width="42" height="42" rx="11" fill="url(#bg)"/>
   <rect x="3" y="3" width="42" height="42" rx="11" fill="url(#hl)"/>
   <rect x="3.5" y="3.5" width="41" height="41" rx="10.5" fill="none" stroke="#fff" stroke-opacity=".10"/>
-  <g fill="url(#fg)" stroke="url(#fg)"><path stroke="none" opacity=".45" d="M14 13h13l7 7v15H14z"/>
+  <g class="ColorScheme-Highlight" fill="currentColor" stroke="currentColor"><path stroke="none" opacity=".45" d="M14 13h13l7 7v15H14z"/>
+           <path fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M18 22h9M18 27h12M18 32h6"/>
+           <path stroke="none" d="M30.5 25.5l5-5 2.8 2.8-5 5-3.6.8z"/></g>
+  <g fill="url(#sheen)" stroke="url(#sheen)"><path stroke="none" opacity=".45" d="M14 13h13l7 7v15H14z"/>
            <path fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M18 22h9M18 27h12M18 32h6"/>
            <path stroke="none" d="M30.5 25.5l5-5 2.8 2.8-5 5-3.6.8z"/></g>
 </svg>

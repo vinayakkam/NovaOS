@@ -24,4 +24,10 @@ cat > "$cfg/baloofilerc" <<'EOF'
 [Basic Settings]
 Indexing-Enabled=false
 EOF
-chown "$LIVE_USER:$LIVE_USER" "$cfg/kscreenlockerrc" "$cfg/baloofilerc"
+# No password wallet in the live session (saves ksecretd, ~50 MB; nothing to keep)
+cat > "$cfg/kwalletrc" <<'EOF'
+[Wallet]
+Enabled=false
+First Use=false
+EOF
+chown "$LIVE_USER:$LIVE_USER" "$cfg/kscreenlockerrc" "$cfg/baloofilerc" "$cfg/kwalletrc"

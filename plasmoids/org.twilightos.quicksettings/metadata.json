@@ -1,0 +1,14 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [{ "Name": "TwilightOS Project" }],
+        "Category": "System Information",
+        "Description": "TwilightOS Quick Settings: network, Bluetooth, airplane mode, night light, do not disturb, dark mode, volume and brightness",
+        "Icon": "configure",
+        "Id": "org.twilightos.quicksettings",
+        "License": "GPL-2.0-or-later",
+        "Name": "Quick Settings",
+        "Version": "1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

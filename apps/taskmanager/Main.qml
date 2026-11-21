@@ -28,6 +28,11 @@ QQC2.ApplicationWindow {
     minimumWidth: 760
     minimumHeight: 480
     visible: true
+
+    // Wayland app id = reversed organisation domain + executable name ("qml" for both
+    // TwilightOS apps), so each app sets its own domain before its window is shown:
+    // org.twilightos.taskmanager.qml
+    readonly property bool appIdentity: { Qt.application.domain = "taskmanager.twilightos.org"; Qt.application.name = "TwilightOS Task Manager"; return true; }
     title: "Task Manager"
     color: base
 
@@ -156,7 +161,7 @@ QQC2.ApplicationWindow {
             for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(0, h * i / 4); ctx.lineTo(w, h * i / 4); ctx.stroke(); }
             if (values.length < 2) return;
             const max = maximum > 0 ? maximum : Math.max(1, ...values) * 1.15;
-            const x = i => w - (values.length - 1 - i) * (w / (n - 1));
+            const x = i => i * (w / (values.length - 1));   // stretch history across the full width
             const y = v => h - Math.min(1, v / max) * (h - 2) - 1;
             ctx.beginPath();
             ctx.moveTo(x(0), h);

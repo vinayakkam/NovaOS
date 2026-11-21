@@ -5,7 +5,7 @@ Inherits=breeze-dark,breeze,hicolor
 Example=folder
 DisplayDepth=32
 FollowsColorScheme=true
-Directories=scalable/apps,scalable/places,symbolic/actions,symbolic/status
+Directories=scalable/apps,scalable/places,symbolic/actions,symbolic/status,symbolic/categories
 
 [scalable/apps]
 Size=48
@@ -33,4 +33,11 @@ Size=22
 MinSize=16
 MaxSize=128
 Context=Status
+Type=Scalable
+
+[symbolic/categories]
+Size=22
+MinSize=16
+MaxSize=128
+Context=Categories
 Type=Scalable
