@@ -1,6 +1,6 @@
 # Calamares installer
 
-`branding/novaos/` is copied to `/usr/share/calamares/branding/novaos/` in the ISO
+`branding/twilightos/` is copied to `/usr/share/calamares/branding/twilightos/` in the ISO
 (`build-iso.sh` also drops the logo in as `logo.svg`).
 
 Calamares itself is **not in the official Arch repos**, so the first ISO ships without it.
@@ -23,5 +23,5 @@ Two ways to add it:
 
 Still TODO once Calamares is in: `settings.conf` and module configs (partition with btrfs
 subvolumes for Snapper, users, bootloader), and a `shellprocess` step that disables
-`novaos-live-user.service`, removes `/etc/sudoers.d/10-novaos-live` and
-`/etc/sddm.conf.d/10-novaos.conf` on the installed system.
+`twilightos-live-user.service`, removes `/etc/sudoers.d/10-twilightos-live` and
+`/etc/sddm.conf.d/10-twilightos.conf` on the installed system.

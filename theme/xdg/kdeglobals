@@ -1,5 +1,5 @@
 
-# --- NovaOS overrides (build-iso.sh prepends theme/colors/Twilight.colors to this file) ---
+# --- TwilightOS overrides (build-iso.sh prepends theme/colors/Twilight.colors to this file) ---
 [General]
 ColorScheme=Twilight
 AccentColor=242,104,58
@@ -13,10 +13,10 @@ fixed=JetBrainsMono Nerd Font,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
 activeFont=Inter,10,-1,5,600,0,0,0,0,0,0,0,0,0,0,1
 
 [KDE]
-LookAndFeelPackage=org.novaos.desktop
+LookAndFeelPackage=org.twilightos.desktop
 widgetStyle=Breeze
 SingleClick=false
 AnimationDurationFactor=0.7
 
 [Icons]
-Theme=NovaOS
+Theme=TwilightOS

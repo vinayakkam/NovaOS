@@ -1,7 +1,7 @@
 [services][org.kde.krunner.desktop]
 _launch=Meta+Space\tAlt+Space\tAlt+F2\tSearch
 
-[services][org.novaos.taskmanager.desktop]
+[services][org.twilightos.taskmanager.desktop]
 _launch=Ctrl+Shift+Esc
 
 [services][org.kde.plasma-systemmonitor.desktop]

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Build the NovaOS ISO from Windows using the WSL "archlinux" distro.
+  Build the TwilightOS ISO from Windows using the WSL "archlinux" distro.
   The work dir stays on the WSL ext4 disk (fast); the ISO is written to <repo>\out on D:.
 .EXAMPLE
   .\scripts\build-iso.ps1
@@ -10,7 +10,7 @@ param([switch]$Nvidia, [switch]$KeepWork, [string]$Distro = 'archlinux')
 $ErrorActionPreference = 'Stop'
 
 $repo = Split-Path $PSScriptRoot -Parent
-# D:\Projects\novaos -> /mnt/d/Projects/novaos
+# D:\Projects\twilightos -> /mnt/d/Projects/twilightos
 $drive = $repo.Substring(0,1).ToLower()
 $wslRepo = "/mnt/$drive" + ($repo.Substring(2) -replace '\\','/')
 

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Settings
+GenericName=TwilightOS Settings
+Comment=Personalise TwilightOS, connect devices and manage your PC
+Exec=twilightos-settings
+Icon=org.twilightos.settings
+Categories=Settings;System;
+Keywords=settings;preferences;control panel;wifi;bluetooth;display;theme;wallpaper;
+StartupWMClass=qml
+StartupNotify=true

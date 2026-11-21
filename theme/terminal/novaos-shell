@@ -1,6 +1,0 @@
-#!/bin/sh
-# NovaOS terminal: greet with the NovaOS system summary, then hand over to the shell.
-if command -v fastfetch >/dev/null 2>&1; then
-    fastfetch --config /usr/share/novaos/terminal/fastfetch.jsonc 2>/dev/null
-fi
-exec "${SHELL:-/bin/bash}" -i

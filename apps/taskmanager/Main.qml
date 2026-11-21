@@ -1,12 +1,12 @@
 /*
-    NovaOS Task Manager: a Windows-style task manager.
+    TwilightOS Task Manager: a Windows-style task manager.
       Processes   - apps and background processes with live CPU / memory, End task
       Performance - CPU, memory, disk and network graphs
       Startup     - apps that start at sign-in (opens the KDE module)
     Uses KDE's ksystemstats sensors and the ksysguard process model (the same data
     as System Monitor), so numbers are real-time and accurate.
 
-    SPDX-FileCopyrightText: 2026 NovaOS Project
+    SPDX-FileCopyrightText: 2026 TwilightOS Project
     SPDX-License-Identifier: GPL-2.0-or-later
 */
 
@@ -81,12 +81,14 @@ QQC2.ApplicationWindow {
     function bytes(v) { return Formatter.Formatter.formatValueShowNull(v || 0, Formatter.Units.UnitByte); }
     function rate(v) { return Formatter.Formatter.formatValueShowNull(v || 0, Formatter.Units.UnitByteRate); }
 
-    // Processes grouped by application, like the Windows "Apps" list
-    Process.ApplicationDataModel {
+    // Every running process with live CPU and memory (the app-grouped model only
+    // lists sandboxed/launched apps and missed Plasma, KWin and services).
+    Process.ProcessDataModel {
         id: appsModel
         enabled: app.page === "processes"
-        // columns: 0 name, 1 CPU, 2 memory, 3 icon name (hidden)
-        enabledAttributes: ["appName", "usage", "vmPSS", "iconName"]
+        flatList: true
+        // columns: 0 name, 1 CPU, 2 memory
+        enabledAttributes: ["name", "usage", "vmPSS"]
     }
     Process.ProcessController { id: controller; window: app }
 
@@ -328,7 +330,9 @@ QQC2.ApplicationWindow {
                             spacing: 10
                             Kirigami.Icon {
                                 visible: cell.column === 0
-                                source: cell.column === 0 ? (sortedApps.data(sortedApps.index(cell.row, 3), Qt.DisplayRole) || "application-x-executable") : ""
+                                // a process name usually matches its app icon (firefox, konsole, dolphin...)
+                                source: cell.column === 0 ? String(cell.model.display || "").toLowerCase() : ""
+                                fallback: "application-x-executable"
                                 Layout.preferredWidth: 20
                                 Layout.preferredHeight: 20
                             }

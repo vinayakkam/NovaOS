@@ -1,6 +1,6 @@
-//! NovaOS Quick Look (stub).
+//! TwilightOS Quick Look (stub).
 //!
-//! Plan: a Dolphin service menu / KIO plugin calls `novaos-quicklook <path>` when the user
+//! Plan: a Dolphin service menu / KIO plugin calls `twilightos-quicklook <path>` when the user
 //! presses Space; this opens a borderless preview window (images, PDFs, text, video) that
 //! closes on Space/Esc. For now it only classifies the file so the integration can be wired up.
 
@@ -39,12 +39,12 @@ fn classify(path: &Path) -> PreviewKind {
 
 fn main() -> ExitCode {
     let Some(arg) = std::env::args_os().nth(1) else {
-        eprintln!("usage: novaos-quicklook <file>");
+        eprintln!("usage: twilightos-quicklook <file>");
         return ExitCode::from(2);
     };
     let path = Path::new(&arg);
     if !path.exists() {
-        eprintln!("novaos-quicklook: {} does not exist", path.display());
+        eprintln!("twilightos-quicklook: {} does not exist", path.display());
         return ExitCode::FAILURE;
     }
     let kind = classify(path);

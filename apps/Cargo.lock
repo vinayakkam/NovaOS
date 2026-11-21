@@ -3,9 +3,9 @@
 version = 4
 
 [[package]]
-name = "novaos-quicklook"
+name = "twilightos-quicklook"
 version = "0.1.0"
 
 [[package]]
-name = "novaos-winlayer"
+name = "twilightos-winlayer"
 version = "0.1.0"

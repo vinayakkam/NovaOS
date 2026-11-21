@@ -1,9 +1,9 @@
 /*
-    NovaOS Settings: a Windows-style settings app for NovaOS (Plasma).
-    Common settings are handled here directly through novaos-settings-helper;
+    TwilightOS Settings: a Windows-style settings app for TwilightOS (Plasma).
+    Common settings are handled here directly through twilightos-settings-helper;
     deeper options open the matching KDE settings module.
 
-    SPDX-FileCopyrightText: 2026 NovaOS Project
+    SPDX-FileCopyrightText: 2026 TwilightOS Project
     SPDX-License-Identifier: GPL-2.0-or-later
 */
 
@@ -38,7 +38,7 @@ QQC2.ApplicationWindow {
     // Follows the system accent colour, so changes show up immediately
     readonly property color accent: Kirigami.Theme.highlightColor
     readonly property color accent2: Qt.lighter(accent, 1.3)
-    readonly property string helper: "/usr/local/bin/novaos-settings-helper"
+    readonly property string helper: "/usr/local/bin/twilightos-settings-helper"
 
     property string page: {
         const a = Qt.application.arguments;
@@ -277,7 +277,7 @@ QQC2.ApplicationWindow {
                     Kirigami.Avatar {
                         Layout.preferredWidth: 64
                         Layout.preferredHeight: 64
-                        source: kuser.faceIconUrl.toString() !== "" ? kuser.faceIconUrl : "file:///usr/share/pixmaps/novaos-avatar.png"
+                        source: kuser.faceIconUrl.toString() !== "" ? kuser.faceIconUrl : "file:///usr/share/pixmaps/twilightos-avatar.png"
                         name: kuser.fullName || kuser.loginName
                     }
                     ColumnLayout {
@@ -391,11 +391,11 @@ QQC2.ApplicationWindow {
                             anchors.fill: parent
                             anchors.margins: 24
                             spacing: 22
-                            Image { source: "file:///usr/share/pixmaps/novaos-avatar.png"; Layout.preferredWidth: 96; Layout.preferredHeight: 96; sourceSize: Qt.size(192, 192) }
+                            Image { source: "file:///usr/share/pixmaps/twilightos-avatar.png"; Layout.preferredWidth: 96; Layout.preferredHeight: 96; sourceSize: Qt.size(192, 192) }
                             ColumnLayout {
                                 spacing: 4
-                                Label { text: app.sys.hostname || "novaos"; font.pixelSize: 22; font.weight: Font.DemiBold }
-                                Sub { text: (app.sys.product || "NovaOS") + " " + (app.sys.version || "") + "  ·  Plasma " + (app.sys.plasma || "") }
+                                Label { text: app.sys.hostname || "twilightos"; font.pixelSize: 22; font.weight: Font.DemiBold }
+                                Sub { text: (app.sys.product || "TwilightOS") + " " + (app.sys.version || "") + "  ·  Plasma " + (app.sys.plasma || "") }
                                 Sub { text: (app.sys.cpu || "") }
                                 Button { text: "Rename"; Layout.topMargin: 6; onClicked: app.kcm("kcm_about-distro") }
                             }
@@ -517,7 +517,7 @@ QQC2.ApplicationWindow {
                 Page {
                     Setting {
                         icon: "preferences-system-bluetooth"; title: "Bluetooth"
-                        subtitle: app.bt === "none" ? "No Bluetooth adapter found" : "Discoverable as \"" + (app.sys.hostname || "novaos") + "\""
+                        subtitle: app.bt === "none" ? "No Bluetooth adapter found" : "Discoverable as \"" + (app.sys.hostname || "twilightos") + "\""
                         Toggle { visible: app.bt !== "none"; on: app.bt === "on"; onToggled: (v) => sh.run("bt-set " + (v ? "on" : "off"), () => app.refresh("bt")) }
                     }
                     Setting { icon: "list-add"; title: "Add device"; subtitle: "Headphones, keyboards, phones and more"; chevron: true; visible: app.bt === "on"; onClicked: app.open("bluedevil-wizard") }
@@ -672,7 +672,7 @@ QQC2.ApplicationWindow {
                             anchors.fill: parent
                             anchors.margins: 20
                             spacing: 20
-                            Kirigami.Avatar { Layout.preferredWidth: 80; Layout.preferredHeight: 80; source: kuser.faceIconUrl.toString() !== "" ? kuser.faceIconUrl : "file:///usr/share/pixmaps/novaos-avatar.png"; name: kuser.fullName || kuser.loginName }
+                            Kirigami.Avatar { Layout.preferredWidth: 80; Layout.preferredHeight: 80; source: kuser.faceIconUrl.toString() !== "" ? kuser.faceIconUrl : "file:///usr/share/pixmaps/twilightos-avatar.png"; name: kuser.fullName || kuser.loginName }
                             ColumnLayout {
                                 spacing: 2
                                 Label { text: kuser.fullName || kuser.loginName; font.pixelSize: 18; font.weight: Font.DemiBold }
@@ -708,7 +708,7 @@ QQC2.ApplicationWindow {
                             Kirigami.Icon { source: "system-software-update"; Layout.preferredWidth: 52; Layout.preferredHeight: 52 }
                             ColumnLayout {
                                 spacing: 2
-                                Label { text: "NovaOS Update"; font.pixelSize: 18; font.weight: Font.DemiBold }
+                                Label { text: "TwilightOS Update"; font.pixelSize: 18; font.weight: Font.DemiBold }
                                 Sub { text: "Apps and system updates are installed with Discover" }
                             }
                             Item { Layout.fillWidth: true }
@@ -716,7 +716,7 @@ QQC2.ApplicationWindow {
                         }
                     }
                     Setting { icon: "edit-undo"; title: "Snapshots"; subtitle: "Btrfs snapshots are taken with Snapper before updates (after install)"; chevron: false }
-                    Setting { icon: "help-about"; title: "About NovaOS"; subtitle: (app.sys.product || "NovaOS") + " " + (app.sys.version || ""); chevron: true; onClicked: app.page = "system" }
+                    Setting { icon: "help-about"; title: "About TwilightOS"; subtitle: (app.sys.product || "TwilightOS") + " " + (app.sys.version || ""); chevron: true; onClicked: app.page = "system" }
                 }
             }
         }

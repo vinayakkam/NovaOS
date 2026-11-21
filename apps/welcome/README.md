@@ -1,12 +1,12 @@
-# NovaOS Welcome (Tauri 2 stub)
+# TwilightOS Welcome (Tauri 2 stub)
 
 First-run setup app. Not built into the ISO yet.
 
 ```bash
 cd apps/welcome
 npm install
-cp ../../theme/branding/novaos-logo.svg src/logo.svg
-npx tauri icon ../../theme/branding/novaos-logo.svg   # generates src-tauri/icons/*
+cp ../../theme/branding/twilightos-logo.svg src/logo.svg
+npx tauri icon ../../theme/branding/twilightos-logo.svg   # generates src-tauri/icons/*
 npm run dev
 ```
 

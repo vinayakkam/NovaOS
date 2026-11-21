@@ -1,5 +1,5 @@
-# NovaOS local package: ONLYOFFICE Desktop Editors, repackaged from the official .deb.
-# Built by scripts/build-iso.sh into the build-time [novaos] repo.
+# TwilightOS local package: ONLYOFFICE Desktop Editors, repackaged from the official .deb.
+# Built by scripts/build-iso.sh into the build-time [twilightos] repo.
 pkgname=onlyoffice-bin
 pkgver=10.0.0
 pkgrel=1

@@ -35,13 +35,13 @@ jobs:
       - name: Build ISO
         env:
           OUT_DIR: ${{ github.workspace }}/out
-          WORK_ROOT: /var/tmp/novaos-build
+          WORK_ROOT: /var/tmp/twilightos-build
           NVIDIA: ${{ inputs.nvidia && '1' || '0' }}
         run: bash scripts/build-iso.sh
 
       - uses: actions/upload-artifact@v4
         with:
-          name: novaos-iso
+          name: twilightos-iso
           path: |
             out/*.iso
             out/*.sha256

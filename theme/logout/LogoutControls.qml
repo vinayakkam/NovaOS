@@ -1,10 +1,10 @@
 /*
-    NovaOS logout controls (Windows Ctrl+Alt+Del style): user, a list of actions,
+    TwilightOS logout controls (Windows Ctrl+Alt+Del style): user, a list of actions,
     Cancel. Visibility rules follow Plasma's LogoutControls.qml so every logout type
     (log out, restart, shut down, "all options") behaves the same.
 
     SPDX-FileCopyrightText: 2014 Aleix Pol Gonzalez <aleixpol@blue-systems.com>
-    SPDX-FileCopyrightText: 2026 NovaOS Project
+    SPDX-FileCopyrightText: 2026 TwilightOS Project
     SPDX-License-Identifier: GPL-2.0-or-later
 */
 
@@ -52,7 +52,7 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: 88
             Layout.preferredHeight: 88
-            source: kuser.faceIconUrl.toString() !== "" ? kuser.faceIconUrl : "file:///usr/share/pixmaps/novaos-avatar.png"
+            source: kuser.faceIconUrl.toString() !== "" ? kuser.faceIconUrl : "file:///usr/share/pixmaps/twilightos-avatar.png"
             name: kuser.fullName || kuser.loginName
         }
         Text {

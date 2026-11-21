@@ -1,7 +1,0 @@
-[Unit]
-Description=NovaOS memory report to serial (VirtualBox test runs only)
-ConditionVirtualization=oracle
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/novaos-memreport

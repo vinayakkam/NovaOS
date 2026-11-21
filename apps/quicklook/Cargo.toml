@@ -1,12 +1,12 @@
 [package]
-name = "novaos-quicklook"
+name = "twilightos-quicklook"
 description = "Press Space in Dolphin to preview a file (stub)"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [[bin]]
-name = "novaos-quicklook"
+name = "twilightos-quicklook"
 path = "src/main.rs"
 
 [dependencies]

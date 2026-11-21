@@ -1,0 +1,14 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [{ "Name": "TwilightOS Project" }],
+        "Category": "Date and Time",
+        "Description": "TwilightOS top bar centre: date and time with a calendar popup",
+        "Icon": "preferences-system-time",
+        "Id": "org.twilightos.topclock",
+        "License": "GPL-2.0-or-later",
+        "Name": "TwilightOS Clock",
+        "Version": "1.1"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

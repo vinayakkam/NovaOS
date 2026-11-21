@@ -1,10 +1,10 @@
 /*
-    NovaOS logout screen (one instance per screen).
+    TwilightOS logout screen (one instance per screen).
     Same interface as Plasma's org.kde.plasma.desktop logout (signals, countdown,
-    controls shared between screens); only the look is NovaOS "Twilight".
+    controls shared between screens); only the look is TwilightOS "Twilight".
 
     SPDX-FileCopyrightText: 2014 Aleix Pol Gonzalez <aleixpol@blue-systems.com>
-    SPDX-FileCopyrightText: 2026 NovaOS Project
+    SPDX-FileCopyrightText: 2026 TwilightOS Project
     SPDX-License-Identifier: GPL-2.0-or-later
 */
 

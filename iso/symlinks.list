@@ -7,14 +7,14 @@
 
 # Desktop
 /etc/systemd/system/display-manager.service                          /usr/lib/systemd/system/sddm.service
-/etc/systemd/system/multi-user.target.wants/novaos-live-user.service ../novaos-live-user.service
+/etc/systemd/system/multi-user.target.wants/twilightos-live-user.service ../twilightos-live-user.service
 
 # Networking / Bluetooth
 /etc/systemd/system/multi-user.target.wants/NetworkManager.service   /usr/lib/systemd/system/NetworkManager.service
 /etc/systemd/system/dbus-org.freedesktop.nm-dispatcher.service       /usr/lib/systemd/system/NetworkManager-dispatcher.service
 /etc/systemd/system/network-online.target.wants/NetworkManager-wait-online.service /usr/lib/systemd/system/NetworkManager-wait-online.service
 # ModemManager is installed but off to save RAM (systemctl enable --now ModemManager for WWAN).
-/etc/systemd/system/timers.target.wants/novaos-memreport.timer       ../novaos-memreport.timer
+/etc/systemd/system/timers.target.wants/twilightos-memreport.timer       ../twilightos-memreport.timer
 /etc/systemd/system/bluetooth.target.wants/bluetooth.service         /usr/lib/systemd/system/bluetooth.service
 /etc/systemd/system/dbus-org.bluez.service                           /usr/lib/systemd/system/bluetooth.service
 /etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service   /usr/lib/systemd/system/systemd-timesyncd.service

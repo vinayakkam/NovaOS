@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=TwilightOS session trim
+Comment=Stops unused background helpers after sign-in to save memory
+Exec=/usr/local/bin/twilightos-session-trim
+NoDisplay=true
+OnlyShowIn=KDE;
+X-KDE-autostart-phase=2

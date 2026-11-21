@@ -1,4 +1,4 @@
-# NovaOS live ISO package list (one package per line, '#' comments allowed).
+# TwilightOS live ISO package list (one package per line, '#' comments allowed).
 # Optional NVIDIA drivers live in packages.nvidia (build with NVIDIA=1).
 # Calamares is not in the official repos - see calamares/README.md.
 
@@ -96,7 +96,7 @@ ttf-jetbrains-mono-nerd
 
 # --- Apps ---
 firefox
-# from the build-time [novaos] repo (packages/onlyoffice-bin)
+# from the build-time [twilightos] repo (packages/onlyoffice-bin)
 onlyoffice-bin
 ttf-carlito
 wine

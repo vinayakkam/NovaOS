@@ -1,14 +1,14 @@
 <#
 .SYNOPSIS
-  Create (or replace) the "NovaOS-Test" VirtualBox VM with the newest ISO attached, then boot it.
+  Create (or replace) the "TwilightOS-Test" VirtualBox VM with the newest ISO attached, then boot it.
   Everything lives on D: (VBOX_USER_HOME=D:\VirtualBox\config, VMs in D:\VirtualBox\VMs).
 .EXAMPLE
   .\scripts\test-vm.ps1
-  .\scripts\test-vm.ps1 -Iso D:\Projects\novaos\out\novaos-2026.11.20-x86_64.iso -NoStart
+  .\scripts\test-vm.ps1 -Iso D:\Projects\twilightos\out\twilightos-2026.11.20-x86_64.iso -NoStart
 #>
 param(
     [string]$Iso,
-    [string]$VmName   = 'NovaOS-Test',
+    [string]$VmName   = 'TwilightOS-Test',
     [int]   $Cpus     = 4,
     [int]   $MemoryMB = 6144,
     [int]   $VramMB   = 128,

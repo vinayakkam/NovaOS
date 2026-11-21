@@ -1,0 +1,9 @@
+{
+    "KPackageStructure": "Wallpaper/Images",
+    "KPlugin": {
+        "Authors": [{ "Name": "TwilightOS Project" }],
+        "Id": "TwilightOS",
+        "License": "CC-BY-SA-4.0",
+        "Name": "TwilightOS"
+    }
+}

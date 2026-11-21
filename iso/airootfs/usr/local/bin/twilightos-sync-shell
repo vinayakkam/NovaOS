@@ -1,0 +1,29 @@
+#!/bin/sh
+# Keep TwilightOS's logout and lock screens in sync with the installed Plasma.
+#
+# Plasma 6.8 loads both screens from the desktop shell package, which has no
+# per-file override. So /usr/local/share (searched before /usr/share) gets an exact
+# copy of the installed shell package with only TwilightOS's QML files swapped in.
+# Re-run by a pacman hook after every plasma-desktop change, so the copy never
+# drifts from the real Plasma version.
+set -eu
+
+SRC=/usr/share/plasma/shells/org.kde.plasma.desktop
+DST=/usr/local/share/plasma/shells/org.kde.plasma.desktop
+OURS=/usr/share/twilightos
+
+if [ ! -d "$SRC" ]; then
+    rm -rf "$DST"          # plasma-desktop removed: drop the shadow copy too
+    exit 0
+fi
+
+tmp="$DST.new"
+rm -rf "$tmp"
+mkdir -p "$(dirname "$DST")"
+cp -a "$SRC" "$tmp"
+for f in Logout.qml LogoutControls.qml LogoutButton.qml; do
+    install -m644 "$OURS/logout/$f" "$tmp/contents/logout/$f"
+done
+install -m644 "$OURS/lockscreen/LockScreenUi.qml" "$tmp/contents/lockscreen/LockScreenUi.qml"
+rm -rf "$DST"
+mv "$tmp" "$DST"

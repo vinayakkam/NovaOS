@@ -1,6 +1,0 @@
-#!/bin/sh
-# Launch NovaOS Settings (a QML app run by Qt's qml runtime). Optional first
-# argument opens a page: home system bluetooth network personalisation apps
-# accounts time update.
-export QT_QUICK_CONTROLS_STYLE="${QT_QUICK_CONTROLS_STYLE:-org.kde.desktop}"
-exec /usr/lib/qt6/bin/qml /usr/share/novaos/settings/Main.qml -- "$@"

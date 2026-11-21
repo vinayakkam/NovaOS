@@ -1,6 +1,6 @@
-// NovaOS icon theme generator.
+// TwilightOS icon theme generator.
 //
-//   node theme/icons/generate.mjs        -> writes theme/icons/NovaOS/
+//   node theme/icons/generate.mjs        -> writes theme/icons/TwilightOS/
 //
 // One design language for every icon:
 //   apps     navy rounded tile, soft top highlight, glyph in a Twilight gradient
@@ -12,7 +12,7 @@ import { mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const OUT = join(dirname(fileURLToPath(import.meta.url)), "NovaOS");
+const OUT = join(dirname(fileURLToPath(import.meta.url)), "TwilightOS");
 
 const C = {
   navyTop: "#1d2a4d", navyBottom: "#0d1428",
@@ -61,7 +61,7 @@ function tile(id, grad, glyph) {
 // glyphs are drawn in a 48x48 box, roughly inside 13..35
 const S = `stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"`;
 const glyphs = {
-  // The NovaOS / Twilight start mark: three rounded tiles and an orbit dot.
+  // The TwilightOS / Twilight start mark: three rounded tiles and an orbit dot.
   mark: `<rect stroke="none" x="13" y="13" width="10" height="10" rx="3.2" fill="#f58a5c"/>
          <circle stroke="none" cx="30" cy="18" r="4" fill="#f7c86a"/>
          <rect stroke="none" x="13" y="25" width="10" height="10" rx="3.2" fill="${C.orange}"/>
@@ -103,8 +103,8 @@ const glyphs = {
 
 const apps = [
   // [names...], gradient, glyph
-  [["novaos-start", "start-here", "start-here-kde", "start-here-kde-plasma", "distributor-logo"], "warm", "mark"],
-  [["org.novaos.settings", "novaos-settings"], "warm", "gear"],
+  [["twilightos-start", "start-here", "start-here-kde", "start-here-kde-plasma", "distributor-logo"], "warm", "mark"],
+  [["org.twilightos.settings", "twilightos-settings"], "warm", "gear"],
   [["system-file-manager", "org.kde.dolphin"], "warm", "folder"],
   [["utilities-terminal", "org.kde.konsole", "konsole"], "sky", "terminal"],
   [["org.kde.discover", "plasmadiscover", "system-software-install"], "ember", "bag"],
@@ -292,8 +292,8 @@ for (const [n, body] of Object.entries(actions)) put(`symbolic/actions/${n}-symb
 // ---------------------------------------------------------------- index.theme
 put("index.theme", `
 [Icon Theme]
-Name=NovaOS
-Comment=NovaOS Twilight icons (original artwork). Everything else comes from Breeze Dark.
+Name=TwilightOS
+Comment=TwilightOS Twilight icons (original artwork). Everything else comes from Breeze Dark.
 Inherits=breeze-dark,breeze,hicolor
 Example=folder
 DisplayDepth=32
@@ -335,4 +335,4 @@ for (const [rel, svg] of files) {
   mkdirSync(dirname(p), { recursive: true });
   writeFileSync(p, svg);
 }
-console.log(`NovaOS icons: ${files.size} files -> ${OUT}`);
+console.log(`TwilightOS icons: ${files.size} files -> ${OUT}`);

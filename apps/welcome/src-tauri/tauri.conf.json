@@ -1,15 +1,15 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "NovaOS Welcome",
+  "productName": "TwilightOS Welcome",
   "version": "0.1.0",
-  "identifier": "org.novaos.welcome",
+  "identifier": "org.twilightos.welcome",
   "build": {
     "frontendDist": "../src"
   },
   "app": {
     "windows": [
       {
-        "title": "Welcome to NovaOS",
+        "title": "Welcome to TwilightOS",
         "width": 900,
         "height": 640,
         "resizable": false,

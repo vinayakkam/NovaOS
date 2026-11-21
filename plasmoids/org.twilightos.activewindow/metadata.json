@@ -1,0 +1,14 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [{ "Name": "TwilightOS Project" }],
+        "Category": "Windows and Tasks",
+        "Description": "TwilightOS top bar: the focused app and window title, or a greeting on an empty desktop",
+        "Icon": "preferences-system-windows",
+        "Id": "org.twilightos.activewindow",
+        "License": "GPL-2.0-or-later",
+        "Name": "TwilightOS Active Window",
+        "Version": "1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

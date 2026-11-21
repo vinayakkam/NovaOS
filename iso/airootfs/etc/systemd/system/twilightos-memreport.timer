@@ -1,0 +1,11 @@
+[Unit]
+Description=TwilightOS memory report (after the desktop has settled)
+ConditionVirtualization=oracle
+
+[Timer]
+OnBootSec=150s
+OnUnitActiveSec=60s
+AccuracySec=1s
+
+[Install]
+WantedBy=timers.target

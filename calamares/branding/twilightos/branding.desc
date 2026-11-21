@@ -1,0 +1,37 @@
+---
+componentName:  twilightos
+
+welcomeStyleCalamares:   false
+welcomeExpandingLogo:   true
+windowExpanding:    normal
+windowSize: 900px,640px
+windowPlacement: center
+sidebar: qml
+navigation: widget
+
+strings:
+    productName:         TwilightOS
+    shortProductName:    TwilightOS
+    version:             0.1
+    shortVersion:        0.1
+    versionedName:       TwilightOS 0.1
+    shortVersionedName:  TwilightOS 0.1
+    bootloaderEntryName: TwilightOS
+    productUrl:          https://example.org/twilightos
+    supportUrl:          https://example.org/twilightos/support
+    knownIssuesUrl:      https://example.org/twilightos/issues
+    releaseNotesUrl:     https://example.org/twilightos/releases
+
+images:
+    productLogo:         "logo.svg"
+    productIcon:         "logo.svg"
+    productWelcome:      "logo.svg"
+
+slideshow:              "show.qml"
+slideshowAPI:           2
+
+style:
+   SidebarBackground:        "#f3f5fb"
+   SidebarText:              "#1b1b1f"
+   SidebarTextCurrent:       "#ffffff"
+   SidebarBackgroundCurrent: "#4f8cff"

@@ -1,5 +1,5 @@
 /*
-    NovaOS lock screen (Windows-style).
+    TwilightOS lock screen (Windows-style).
 
     Idle:   the wallpaper with a large clock and date.
     Active: any key or click slides the clock away, blurs the wallpaper and shows the
@@ -10,7 +10,7 @@
     root.clearPassword), so authentication behaves exactly as in stock Plasma.
 
     SPDX-FileCopyrightText: 2014 Aleix Pol Gonzalez <aleixpol@blue-systems.com>
-    SPDX-FileCopyrightText: 2026 NovaOS Project
+    SPDX-FileCopyrightText: 2026 TwilightOS Project
     SPDX-License-Identifier: GPL-2.0-or-later
 */
 
@@ -292,8 +292,8 @@ Item {
                     fillMode: Image.PreserveAspectCrop
                     source: kscreenlocker_userImage !== ""
                             ? "file://" + kscreenlocker_userImage.split("/").map(encodeURIComponent).join("/")
-                            : "file:///usr/share/pixmaps/novaos-avatar.png"
-                    onStatusChanged: if (status === Image.Error) source = "file:///usr/share/pixmaps/novaos-avatar.png"
+                            : "file:///usr/share/pixmaps/twilightos-avatar.png"
+                    onStatusChanged: if (status === Image.Error) source = "file:///usr/share/pixmaps/twilightos-avatar.png"
                     visible: false
                 }
                 Rectangle { id: faceMask; anchors.fill: face; radius: width / 2; visible: false; layer.enabled: true }

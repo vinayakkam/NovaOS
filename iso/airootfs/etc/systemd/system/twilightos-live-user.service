@@ -1,0 +1,12 @@
+[Unit]
+Description=Create TwilightOS live user
+Before=display-manager.service sddm.service systemd-user-sessions.service
+After=systemd-sysusers.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/twilightos-live-user
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

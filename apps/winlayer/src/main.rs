@@ -1,8 +1,8 @@
-//! NovaOS WinLayer (stub).
+//! TwilightOS WinLayer (stub).
 //!
 //! Plan: registered as the handler for application/x-ms-dos-executable and
 //! application/x-msi. Double-clicking an .exe/.msi runs it through Wine in a per-app prefix
-//! (~/.local/share/novaos/wine/<app>), shows a friendly progress dialog, and creates a menu
+//! (~/.local/share/twilightos/wine/<app>), shows a friendly progress dialog, and creates a menu
 //! entry after install. For now it builds the Wine command and runs it (or prints it with
 //! --dry-run).
 
@@ -43,19 +43,19 @@ fn default_prefix() -> PathBuf {
         .map(PathBuf::from)
         .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".local/share")))
         .unwrap_or_else(|| PathBuf::from("."));
-    base.join("novaos/wine/default")
+    base.join("twilightos/wine/default")
 }
 
 fn main() -> ExitCode {
     let args: Vec<OsString> = std::env::args_os().skip(1).collect();
     let dry_run = args.iter().any(|a| a == "--dry-run");
     let Some(file) = args.iter().find(|a| *a != "--dry-run") else {
-        eprintln!("usage: novaos-winlayer [--dry-run] <program.exe|installer.msi>");
+        eprintln!("usage: twilightos-winlayer [--dry-run] <program.exe|installer.msi>");
         return ExitCode::from(2);
     };
     let path = Path::new(file);
     if kind_of(path).is_none() {
-        eprintln!("novaos-winlayer: {} is not an .exe or .msi", path.display());
+        eprintln!("twilightos-winlayer: {} is not an .exe or .msi", path.display());
         return ExitCode::from(2);
     }
 
@@ -68,11 +68,11 @@ fn main() -> ExitCode {
     match cmd.status() {
         Ok(s) if s.success() => ExitCode::SUCCESS,
         Ok(s) => {
-            eprintln!("novaos-winlayer: wine exited with {s}");
+            eprintln!("twilightos-winlayer: wine exited with {s}");
             ExitCode::FAILURE
         }
         Err(e) => {
-            eprintln!("novaos-winlayer: could not start wine: {e}");
+            eprintln!("twilightos-winlayer: could not start wine: {e}");
             ExitCode::FAILURE
         }
     }

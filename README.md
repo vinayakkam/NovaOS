@@ -1,8 +1,8 @@
-# NovaOS
+# TwilightOS
 
 Arch-based Linux with a KDE Plasma 6 desktop that looks like Windows 11 and borrows
 macOS conveniences (Spotlight-style search, hot corners, Quick Look, gestures).
-*"NovaOS" is a placeholder name.*
+*Formerly "NovaOS".*
 
 ## Layout
 
@@ -22,7 +22,7 @@ macOS conveniences (Spotlight-style search, hot corners, Quick Look, gestures).
 ```
 
 Runs `scripts/build-iso.sh` as root in the `archlinux` WSL distro. The work dir is
-`/var/tmp/novaos-build` on the WSL disk (`D:\WSL\Arch\ext4.vhdx`), and the ISO lands in `out\`.
+`/var/tmp/twilightos-build` on the WSL disk (`D:\WSL\Arch\ext4.vhdx`), and the ISO lands in `out\`.
 The Fluent icon and KDE themes (GPL-3.0, vinceliuice) are fetched at pinned commits during the build.
 
 Inside Linux directly: `sudo bash scripts/build-iso.sh`.
@@ -33,7 +33,7 @@ Inside Linux directly: `sudo bash scripts/build-iso.sh`.
 .\scripts\test-vm.ps1
 ```
 
-Recreates the `NovaOS-Test` VM in `D:\VirtualBox\VMs` (EFI, 4 CPUs, 6 GB RAM, 128 MB VRAM,
+Recreates the `TwilightOS-Test` VM in `D:\VirtualBox\VMs` (EFI, 4 CPUs, 6 GB RAM, 128 MB VRAM,
 VMSVGA, 40 GB VDI) with the newest ISO attached and boots it.
 
 ## Desktop defaults
@@ -42,6 +42,6 @@ VMSVGA, 40 GB VDI) with the newest ISO attached and boots it.
 - Fluent (rounded, light) Plasma style, window decorations, Kvantum and icons; Inter font.
 - KRunner on **Meta+Space** (Spotlight), free-floating; typing on the desktop opens it.
 - Top-left hot corner opens **Overview**. Touchpad gestures are KWin Wayland's built-in ones.
-- The live session auto-logs in as `nova` (no password, passwordless sudo).
+- The live session auto-logs in as `twilight` (no password, passwordless sudo).
 
 No Microsoft or Apple logos, fonts, icons or wallpapers are used.

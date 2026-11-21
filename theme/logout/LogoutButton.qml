@@ -1,6 +1,6 @@
 /*
-    NovaOS logout action row: icon + label, full-width, Windows Ctrl+Alt+Del style.
-    SPDX-FileCopyrightText: 2026 NovaOS Project
+    TwilightOS logout action row: icon + label, full-width, Windows Ctrl+Alt+Del style.
+    SPDX-FileCopyrightText: 2026 TwilightOS Project
     SPDX-License-Identifier: GPL-2.0-or-later
 */
 

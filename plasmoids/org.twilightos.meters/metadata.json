@@ -1,0 +1,14 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [{ "Name": "TwilightOS Project" }],
+        "Category": "System Information",
+        "Description": "TwilightOS top bar: compact CPU and memory meters",
+        "Icon": "utilities-system-monitor",
+        "Id": "org.twilightos.meters",
+        "License": "GPL-2.0-or-later",
+        "Name": "TwilightOS Meters",
+        "Version": "1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

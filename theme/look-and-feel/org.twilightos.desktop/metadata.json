@@ -1,0 +1,13 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [{ "Name": "TwilightOS Project" }],
+        "Category": "",
+        "Description": "TwilightOS Twilight: top bar with clock and CPU/RAM meters, centered dodging dock, navy and amber colours",
+        "Id": "org.twilightos.desktop",
+        "License": "GPL-2.0-or-later",
+        "Name": "TwilightOS Twilight",
+        "Version": "0.2"
+    },
+    "X-Plasma-APIVersion": "2"
+}
